@@ -3,6 +3,7 @@ package com.aoao.xiaoaoshu.auth.sms;
 import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.dysmsapi20170525.models.SendSmsRequest;
 import com.aliyun.dysmsapi20170525.models.SendSmsResponse;
+import com.aoao.xiaoaoshu.auth.properties.AliSmsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class AliSmsSender {
+public class AliSmsHelper {
 
     @Autowired
     private Client client;

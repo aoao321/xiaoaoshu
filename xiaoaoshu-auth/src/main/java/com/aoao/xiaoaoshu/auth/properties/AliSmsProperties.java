@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.auth.sms;
+package com.aoao.xiaoaoshu.auth.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,3 +18,4 @@ public class AliSmsProperties {
     private String signName;
     private String templateCode;
 }
+

@@ -7,14 +7,13 @@ import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.auth.constant.RedisKeyConstants;
 import com.aoao.xiaoaoshu.auth.model.vo.verificationcode.SendVerificationCodeReqVO;
 import com.aoao.xiaoaoshu.auth.service.VerificationCodeService;
-import com.aoao.xiaoaoshu.auth.sms.AliSmsSender;
+import com.aoao.xiaoaoshu.auth.sms.AliSmsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
@@ -29,7 +28,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
-    private AliSmsSender aliSmsSender;
+    private AliSmsHelper aliSmsHelper;
 
     @Override
     public Result<?> send(SendVerificationCodeReqVO sendVerificationCodeReqVO) {
@@ -46,7 +45,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         // 存入redis中，设置过期时间1分钟
         stringRedisTemplate.opsForValue().set(key,code,1, TimeUnit.MINUTES);
         // TODO: 发短信
-        aliSmsSender.sendVerificationCode(phone,code);
+        aliSmsHelper.sendVerificationCode(phone,code);
         return Result.success();
     }
 }

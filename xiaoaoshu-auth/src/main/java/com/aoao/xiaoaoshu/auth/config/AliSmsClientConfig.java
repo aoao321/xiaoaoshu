@@ -1,7 +1,7 @@
 package com.aoao.xiaoaoshu.auth.config;
 
 import com.aliyun.dysmsapi20170525.Client;
-import com.aoao.xiaoaoshu.auth.sms.AliSmsProperties;
+import com.aoao.xiaoaoshu.auth.properties.AliSmsProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

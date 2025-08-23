@@ -1,10 +1,9 @@
 package com.aoao.xiaoaoshu.auth;
 
 import com.alibaba.druid.filter.config.ConfigTools;
-import com.aoao.xiaoaoshu.auth.sms.AliSmsProperties;
+import com.aoao.xiaoaoshu.auth.properties.AliSmsProperties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

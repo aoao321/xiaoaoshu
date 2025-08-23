@@ -5,49 +5,83 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class UserDO {
+    /**
+     * 主键ID
+     */
     private Long id;
 
-    private String username;
+    /**
+     * 小奥数ID
+     */
+    private String xiaohashuId;
 
-    private Date createTime;
+    /**
+     * 密码
+     */
+    private String password;
 
-    private Date updateTime;
+    /**
+     * 昵称
+     */
+    private String nickname;
 
-    public Long getId() {
-        return id;
-    }
+    /**
+     * 头像
+     */
+    private String avatar;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 生日
+     */
+    private LocalDate birthday;
 
-    public String getUsername() {
-        return username;
-    }
+    /**
+     * 背景图
+     */
+    private String backgroundImg;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    /**
+     * 手机号
+     */
+    private String phone;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 性别 (0:未知, 1:男, 2:女)
+     */
+    private Integer sex;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 状态 (0:正常, 1:禁用, 2:冻结等)
+     */
+    private Integer status;
 
-    public Date getUpdateTime() {
-        return updateTime;
-    }
+    /**
+     * 个人介绍
+     */
+    private String introduction;
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    /**
+     * 是否删除 (0:未删除, 1:已删除)
+     */
+    private Boolean isDeleted;
+
+
 }

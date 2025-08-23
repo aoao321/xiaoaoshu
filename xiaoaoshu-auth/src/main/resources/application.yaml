@@ -14,3 +14,15 @@ ali:
     endpoint: dysmsapi.aliyuncs.com
     sign-name: "阿里云短信测试"
     template-code: "SMS_154950909"
+
+jwt:
+  # 签发人
+  issuer: aoao
+  # 秘钥
+  secret: jElxcSUj38+Bnh73T68lNs0DfBSit6U3whQlcGO2XwnI+Bo3g4xsiCIPg8PV/L0fQMis08iupNwhe2PzYLB9Xg==
+  # token 过期时间（单位：分钟） 24*60
+  tokenExpireTime: 7200
+  # token 请求头中的 key 值
+  tokenHeaderKey: Authorization
+  # 前端传递token前缀
+  tokenPrefix: Bearer
