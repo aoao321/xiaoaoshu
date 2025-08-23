@@ -44,10 +44,51 @@
     <druid.version>1.2.21</druid.version>
     <mybatis-generator-maven-plugin.version>1.3.5</mybatis-generator-maven-plugin.version>
     <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
+    <guava.version>33.0.0-jre</guava.version>
+    <hutool.version>5.8.26</hutool.version>
+    <commons-lang3.version>3.12.0</commons-lang3.version>
+    <validation.version>3.0.2</validation.version>
+    <hibernate-validator>8.0.1.Final</hibernate-validator>
+    <pagehelper>1.4.6</pagehelper>
+
   </properties>
 
   <dependencyManagement>
     <dependencies>
+
+      <dependency>
+        <groupId>com.github.pagehelper</groupId>
+        <artifactId>pagehelper-spring-boot-starter</artifactId>
+        <version>${pagehelper}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${validation.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>${hibernate-validator}</version>
+      </dependency>
+      <!-- 相关工具类 -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>${hutool.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
       <!-- 入参校验 -->
       <dependency>
         <groupId>jakarta.validation</groupId>

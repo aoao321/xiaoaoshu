@@ -15,7 +15,9 @@ public enum ResponseCodeEnum {
     // ----------- 业务异常状态码 -----------
     PRODUCT_NOT_FOUND("20000", "该产品不存在（测试使用）"),
 
-    PARAM_NOT_VALID("10001","参数验证错误"),;
+    PARAM_NOT_VALID("10001","参数验证错误"),
+
+    VERIFICATION_CODE_SEND_FREQUENTLY("400000", "请求太频繁，请1分钟后再试"),;
 
     ResponseCodeEnum(String errorCode, String errorMessage) {
         this.errorCode = errorCode;

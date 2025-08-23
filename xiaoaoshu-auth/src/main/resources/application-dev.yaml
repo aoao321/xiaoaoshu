@@ -37,3 +37,17 @@ spring:
         wall: # 防火墙
           config:
             multi-statement-allow: true
+
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 1
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+
+

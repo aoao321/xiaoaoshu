@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     public Result handleOtherException(HttpServletRequest request, Exception e) {
-        log.error("{} request error , errorMessage: {}", request.getRequestURI(), e.getMessage());
+        log.error("{} request error , errorMessage: {}", request.getRequestURI(), e);
         return Result.fail(ResponseCodeEnum.SYSTEM_ERROR);
     }
 }
