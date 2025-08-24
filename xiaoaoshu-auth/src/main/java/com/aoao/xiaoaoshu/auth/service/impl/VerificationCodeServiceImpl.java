@@ -42,9 +42,9 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         }
         // 生成验证码
         String code = RandomUtil.randomNumbers(4);
-        // 存入redis中，设置过期时间1分钟
-        stringRedisTemplate.opsForValue().set(key,code,1, TimeUnit.MINUTES);
-        // TODO: 发短信
+        // 存入redis中，设置过期时间3分钟
+        stringRedisTemplate.opsForValue().set(key,code,3, TimeUnit.MINUTES);
+        // 发短信
         aliSmsHelper.sendVerificationCode(phone,code);
         return Result.success();
     }

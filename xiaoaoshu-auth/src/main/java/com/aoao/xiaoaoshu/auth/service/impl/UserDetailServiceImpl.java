@@ -28,7 +28,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         // 1.根据username从数据库中获取用户实例
-        UserDO userDO = userDOMapper.getByUsername(phone);
+        UserDO userDO = userDOMapper.getByPhone(phone);
         // 2.判断用户是否存在
         if(Objects.isNull(userDO)){
             throw new UsernameNotFoundException(phone);

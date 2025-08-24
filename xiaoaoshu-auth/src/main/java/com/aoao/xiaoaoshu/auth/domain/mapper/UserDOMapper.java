@@ -18,6 +18,6 @@ public interface UserDOMapper {
 
     int updateByPrimaryKey(UserDO record);
 
-    @Select("SELECT * FROM t_")
-    UserDO getByUsername(String username);
+    @Select("SELECT * FROM t_user WHERE phone = #{phone}")
+    UserDO getByPhone(String phone);
 }

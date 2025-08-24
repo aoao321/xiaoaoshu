@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +19,8 @@ import java.util.stream.Collectors;
 @Data
 public class LoginUser implements UserDetails {
 
+
+
     private UserDO userDO;
     private List<String> permissions;
 
@@ -27,6 +28,9 @@ public class LoginUser implements UserDetails {
     private List<SimpleGrantedAuthority> authorities;
 
 
+    public LoginUser(UserDO userDO) {
+        this.userDO = userDO;
+    }
 
     public LoginUser(UserDO userDO, List<String> permissions){
         this.userDO = userDO;

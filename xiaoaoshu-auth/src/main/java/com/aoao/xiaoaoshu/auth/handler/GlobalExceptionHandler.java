@@ -5,6 +5,7 @@ import com.aoao.framework.common.exception.BaseException;
 import com.aoao.framework.common.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,9 +69,17 @@ public class GlobalExceptionHandler {
      * @param e
      * @return
      */
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(Exception.class)
     public Result handleOtherException(HttpServletRequest request, Exception e) {
         log.error("{} request error , errorMessage: {}", request.getRequestURI(), e);
         return Result.fail(ResponseCodeEnum.SYSTEM_ERROR);
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public Result handleBadCredentialsException(BadCredentialsException e) {
+        log.warn("登录失败：密码错误", e);
+        return Result.fail(ResponseCodeEnum.PASSWORD_ERROR);
+    }
+
+
 }

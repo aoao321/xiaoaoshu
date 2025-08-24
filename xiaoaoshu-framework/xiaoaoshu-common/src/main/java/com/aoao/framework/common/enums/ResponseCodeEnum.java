@@ -17,7 +17,11 @@ public enum ResponseCodeEnum {
 
     PARAM_NOT_VALID("10001","参数验证错误"),
 
-    VERIFICATION_CODE_SEND_FREQUENTLY("400000", "请求太频繁，请1分钟后再试"),;
+    VERIFICATION_CODE_SEND_FREQUENTLY("400000", "请求太频繁，请3分钟后再试"),
+    VERIFICATION_CODE_USELESS("400001", "验证码不存在或已过期"),
+    VERIFICATION_CODE_ERROR("400002", "验证码错误"),
+    PASSWORD_ERROR("50000", "密码错误"),
+    USERNAME_OR_PWD_IS_NULL("20003","用户名或密码为空"),;
 
     ResponseCodeEnum(String errorCode, String errorMessage) {
         this.errorCode = errorCode;
