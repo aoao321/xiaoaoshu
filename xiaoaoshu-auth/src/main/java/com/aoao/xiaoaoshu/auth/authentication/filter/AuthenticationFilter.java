@@ -2,6 +2,7 @@ package com.aoao.xiaoaoshu.auth.authentication.filter;
 
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
+import com.aoao.xiaoaoshu.auth.authentication.exception.UsernameOrPasswordNullException;
 import com.aoao.xiaoaoshu.auth.authentication.token.CodeAuthenticationToken;
 import com.aoao.xiaoaoshu.auth.enums.LoginTypeEnum;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,9 +26,8 @@ import java.io.IOException;
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     // 登录路径拦截
-    public AuthenticationFilter(AuthenticationManager authenticationManager) {
+    public AuthenticationFilter() {
         super(new AntPathRequestMatcher("/user/login", "POST"));
-        setAuthenticationManager(authenticationManager);
     }
 
     /**
@@ -38,8 +38,11 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         ObjectMapper mapper = new ObjectMapper();
         // 解析提交的 JSON 数据
         JsonNode jsonNode = mapper.readTree(request.getInputStream());
-        JsonNode phoneNode = jsonNode.get("phone");
-        String phone = phoneNode.asText();
+        // 校验手机号
+        String phone = jsonNode.hasNonNull("phone") ? jsonNode.get("phone").asText() : null;
+        if (phone == null || phone.isBlank()) {
+            throw new BizException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL);
+        }
         // 判断登录方式
         String loginType = jsonNode.get("type").asText();
         // 密码登录
@@ -54,7 +57,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
             CodeAuthenticationToken token = new CodeAuthenticationToken(phone, code);
             return this.getAuthenticationManager().authenticate(token);
         } else {
-            throw new BizException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL);
+            throw new UsernameOrPasswordNullException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL.getErrorMessage());
         }
 
     }

@@ -21,5 +21,11 @@ public class RedisKeyConstants {
     }
 
 
+    private static final String TOKEN_KEY_PREFIX = "token:";
+
+    public static String buildTokenKey(Long userId) {
+        return TOKEN_KEY_PREFIX + userId;
+
+    }
 }
 

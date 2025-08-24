@@ -104,7 +104,7 @@ public class JwtTokenHelper implements InitializingBean {
      * @param token
      * @return
      */
-    public String getUsernameByToken(String token) {
+    public String getIdByToken(String token) {
         try {
             Claims claims = jwtParser.parseClaimsJws(token).getBody();
             String username = claims.getSubject();

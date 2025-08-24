@@ -8,5 +8,5 @@ import com.aoao.xiaoaoshu.auth.model.vo.user.UserLoginReqVO;
  * @create 2025-08-24-14:42
  */
 public interface UserService {
-    Result login(UserLoginReqVO userLoginReqVO);
+
 }

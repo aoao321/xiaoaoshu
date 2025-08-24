@@ -20,4 +20,7 @@ public interface UserDOMapper {
 
     @Select("SELECT * FROM t_user WHERE phone = #{phone}")
     UserDO getByPhone(String phone);
+
+    @Select("SELECT * FROM t_user WHERE id = #{id}")
+    UserDO getById(Long id);
 }

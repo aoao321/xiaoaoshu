@@ -5,6 +5,7 @@ import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.auth.constant.RedisKeyConstants;
+import com.aoao.xiaoaoshu.auth.constant.RedisTimeConstants;
 import com.aoao.xiaoaoshu.auth.model.vo.verificationcode.SendVerificationCodeReqVO;
 import com.aoao.xiaoaoshu.auth.service.VerificationCodeService;
 import com.aoao.xiaoaoshu.auth.sms.AliSmsHelper;
@@ -43,7 +44,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         // 生成验证码
         String code = RandomUtil.randomNumbers(4);
         // 存入redis中，设置过期时间3分钟
-        stringRedisTemplate.opsForValue().set(key,code,3, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(key,code, RedisTimeConstants.CODE_TTL, TimeUnit.SECONDS);
         // 发短信
         aliSmsHelper.sendVerificationCode(phone,code);
         return Result.success();
