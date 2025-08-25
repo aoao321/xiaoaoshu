@@ -21,11 +21,22 @@ public class RedisKeyConstants {
     }
 
 
+    /**
+     * token KEY前缀
+     */
     private static final String TOKEN_KEY_PREFIX = "token:";
 
+    /**
+     * 构建token KEY
+     */
     public static String buildTokenKey(Long userId) {
         return TOKEN_KEY_PREFIX + userId;
 
     }
+
+    /**
+     * 自增长id KEY
+     */
+    public static final String XIAOAOSHU_ID_GENERATOR_KEY = "xiaoaoshu_id_generator";
 }
 

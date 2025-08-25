@@ -6,10 +6,9 @@ import java.util.List;
 
 /**
  * @author aoao
- * @create 2025-08-23-21:41
+ * @create 2025-08-25-20:19
  */
 @Mapper
-public interface PermissionDOMapper {
-
-    List<String> findPermissionByPhone(String phone);
+public interface RoleDOMapper {
+    List<String> findRoleByPhone(String phone);
 }

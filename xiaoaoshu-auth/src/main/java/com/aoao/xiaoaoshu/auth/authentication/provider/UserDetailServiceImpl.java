@@ -1,8 +1,8 @@
-package com.aoao.xiaoaoshu.auth.service.impl;
+package com.aoao.xiaoaoshu.auth.authentication.provider;
 
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
-import com.aoao.xiaoaoshu.auth.domain.mapper.PermissionDOMapper;
+import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
 import com.aoao.xiaoaoshu.auth.domain.mapper.UserDOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +23,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     private UserDOMapper userDOMapper;
     @Autowired
-    private PermissionDOMapper permissionDOMapper;
+    private RoleDOMapper roleDOMapper;
+
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
@@ -34,7 +35,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(phone);
         }
         // 3.获取权限集合
-        List<String> list = permissionDOMapper.findPermissonByPhone(phone);
+        List<String> list = roleDOMapper.findRoleByPhone(phone);
         return new LoginUser(userDO,list);
     }
 }
