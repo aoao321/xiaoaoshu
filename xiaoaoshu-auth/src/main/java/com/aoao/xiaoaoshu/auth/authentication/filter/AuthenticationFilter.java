@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -23,42 +24,57 @@ import java.io.IOException;
  * @author aoao
  * @create 2025-08-24-17:34
  */
+@Component
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     // 登录路径拦截
-    public AuthenticationFilter() {
+    public AuthenticationFilter(AuthenticationManager authenticationManager) {
         super(new AntPathRequestMatcher("/user/login", "POST"));
+        setAuthenticationManager(authenticationManager);
     }
 
     /**
      * 构造authentication对象
      */
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        ObjectMapper mapper = new ObjectMapper();
-        // 解析提交的 JSON 数据
-        JsonNode jsonNode = mapper.readTree(request.getInputStream());
-        // 校验手机号
-        String phone = jsonNode.hasNonNull("phone") ? jsonNode.get("phone").asText() : null;
-        if (phone == null || phone.isBlank()) {
-            throw new BizException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL);
-        }
-        // 判断登录方式
-        String loginType = jsonNode.get("type").asText();
-        // 密码登录
-        if (LoginTypeEnum.PASSWORD.equals(LoginTypeEnum.valueOf(loginType))) {
-            String password = jsonNode.get("password").asText();
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(phone, password);
-            return this.getAuthenticationManager().authenticate(token);
-        // 验证码登录
-        } else if (LoginTypeEnum.VERIFICATION_CODE.equals(LoginTypeEnum.valueOf(loginType))) {
-            String code = jsonNode.get("code").asText();
-            CodeAuthenticationToken token = new CodeAuthenticationToken(phone, code);
-            return this.getAuthenticationManager().authenticate(token);
-        } else {
-            throw new UsernameOrPasswordNullException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL.getErrorMessage());
-        }
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException, IOException {
 
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(request.getInputStream());
+
+            String phone = jsonNode.hasNonNull("phone") ? jsonNode.get("phone").asText() : null;
+            if (phone == null || phone.isBlank()) {
+                throw new BizException(ResponseCodeEnum.USERNAME_OR_PWD_IS_NULL);
+            }
+
+            // 手机号必须 11 位
+            if (!phone.matches("^\\d{11}$")) {
+                throw new BizException(ResponseCodeEnum.PHONE_ERROR); // 自定义错误码
+            }
+
+            String loginType = jsonNode.get("type").asText();
+            LoginTypeEnum typeEnum = LoginTypeEnum.valueOf(Integer.valueOf(loginType));
+
+            if (LoginTypeEnum.PASSWORD.equals(typeEnum)) {
+                String password = jsonNode.get("password").asText();
+                UsernamePasswordAuthenticationToken token =
+                        new UsernamePasswordAuthenticationToken(phone, password);
+                return this.getAuthenticationManager().authenticate(token);
+
+            } else if (LoginTypeEnum.VERIFICATION_CODE.equals(typeEnum)) {
+                String code = jsonNode.get("code").asText();
+                CodeAuthenticationToken token = new CodeAuthenticationToken(phone, code);
+                return this.getAuthenticationManager().authenticate(token);
+
+            } else {
+                throw new BizException(ResponseCodeEnum.TYPE_ERROR);
+            }
+
+        } catch (BizException e) {
+            // 关键：将 BizException 包装成 AuthenticationServiceException
+            throw new org.springframework.security.authentication.AuthenticationServiceException(e.getErrorMessage(), e);
+        }
     }
 }

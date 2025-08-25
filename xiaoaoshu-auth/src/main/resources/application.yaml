@@ -12,6 +12,7 @@ mybatis:
 ali:
   sms:
     endpoint: dysmsapi.aliyuncs.com
+
     sign-name: "阿里云短信测试"
     template-code: "SMS_154950909"
 

@@ -79,6 +79,6 @@ public class LoginUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return userDO.getStatus() != null && userDO.getStatus() == 1;
+        return userDO.getStatus() != null && userDO.getStatus() == 0;
     }
 }

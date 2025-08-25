@@ -17,5 +17,14 @@ public abstract class BaseException extends RuntimeException {
   // 错误信息
   private String errorMessage;
 
+  public BaseException(String message) {
+    super(message); // 调用 RuntimeException 的构造器
+  }
+
+  public BaseException(String message, String errorCode) {
+    super(message);
+    this.errorCode = errorCode;
+    this.errorMessage = message;
+  }
 
 }

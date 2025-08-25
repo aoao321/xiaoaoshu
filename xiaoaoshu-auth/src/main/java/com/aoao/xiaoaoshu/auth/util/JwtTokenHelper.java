@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ public class JwtTokenHelper implements InitializingBean {
      * 解码配置文件中配置的 Base 64 编码 key 为秘钥
      * @param base64Key
      */
+    @Value("${jwt.secret}")
     public void setBase64Key(String base64Key) {
         key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(base64Key));
     }
