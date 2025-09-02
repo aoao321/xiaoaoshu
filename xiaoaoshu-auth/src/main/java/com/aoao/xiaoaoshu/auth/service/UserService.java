@@ -9,4 +9,6 @@ import com.aoao.xiaoaoshu.auth.model.vo.user.UserLoginReqVO;
  */
 public interface UserService {
 
+
+    Result logout();
 }

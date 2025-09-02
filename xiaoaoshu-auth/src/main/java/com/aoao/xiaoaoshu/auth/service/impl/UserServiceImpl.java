@@ -33,4 +33,8 @@ public class UserServiceImpl implements UserService {
     private UserDOMapper userDOMapper;
 
 
+    @Override
+    public Result logout() {
+        return Result.success();
+    }
 }

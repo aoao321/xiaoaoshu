@@ -2,8 +2,10 @@ package com.aoao.xiaoaoshu.auth.authentication.provider;
 
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
+import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.xiaoaoshu.auth.authentication.token.CodeAuthenticationToken;
 import com.aoao.xiaoaoshu.auth.constant.RedisKeyConstants;
+import com.aoao.xiaoaoshu.auth.constant.RedisTimeConstants;
 import com.aoao.xiaoaoshu.auth.constant.RoleConstants;
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Proxy;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author aoao
@@ -66,8 +69,11 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
                 CodeAuthenticationProvider proxy = (CodeAuthenticationProvider) AopContext.currentProxy();
                 user = proxy.register(phone);
             }
-            List<String> permissions = roleDOMapper.findRoleByPhone(phone);
-            LoginUser loginUser = new LoginUser(user, permissions);
+            List<String> roles = roleDOMapper.findRoleByPhone(phone);
+            LoginUser loginUser = new LoginUser(user, roles);
+            // 把用户-角色存入redis中
+            String userRolesKey = RedisKeyConstants.buildUserRoleKey(phone);
+            redisTemplate.opsForValue().set(userRolesKey, JsonUtil.toJson(roles), RedisTimeConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
             return new CodeAuthenticationToken(loginUser, code, loginUser.getAuthorities());
         } catch (BizException e) {
             throw new org.springframework.security.authentication.BadCredentialsException(e.getErrorMessage(), e);

@@ -38,9 +38,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // 生成token
         UserDO userDO = user.getUserDO();
         Long id = userDO.getId();
+        String phone = userDO.getPhone();
         String token = jwtTokenHelper.generateToken(id.toString());
         // 存入redis中
-        String key = RedisKeyConstants.buildTokenKey(id);
+        String key = RedisKeyConstants.buildTokenKey(phone);
         stringRedisTemplate.opsForValue().set(key,token, RedisTimeConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
         // 返回
         HttpResultUtil.ok(response, Result.success(token));

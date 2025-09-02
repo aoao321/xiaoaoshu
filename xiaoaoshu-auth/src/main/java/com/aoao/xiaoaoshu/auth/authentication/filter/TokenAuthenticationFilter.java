@@ -79,12 +79,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                // 从 Token 中解析出用户名
+                // 从 Token 中解析出id
                 String id = jwtTokenHelper.getIdByToken(token);
                 if (StringUtils.isNotBlank(id)
                         && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
+                    UserDO userDO = userDOMapper.getById(Long.valueOf(id));
                     // 验证redis
-                    String redisToken = stringRedisTemplate.opsForValue().get(RedisKeyConstants.buildTokenKey(Long.valueOf(id)));
+                    String redisToken = stringRedisTemplate.opsForValue().get(RedisKeyConstants.buildTokenKey(userDO.getPhone()));
                     if (!token.equals(redisToken)) {
                         // Token 已失效或被覆盖，拒绝访问
                         throw new AuthenticationServiceException("Token 已失效或被覆盖，请重新登录");

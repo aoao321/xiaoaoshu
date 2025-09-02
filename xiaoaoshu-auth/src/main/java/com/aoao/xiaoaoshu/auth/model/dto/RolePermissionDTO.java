@@ -1,22 +1,21 @@
-package com.aoao.xiaoaoshu.auth.domain.entity;
+package com.aoao.xiaoaoshu.auth.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * @author aoao
- * @create 2025-08-23-21:37
+ * @create 2025-09-02-15:04
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionDO implements Serializable {
+public class RolePermissionDTO {
 
-    static final long serialVersionUID = 126738L;
+    private Long roleId;
 
     private Long id;
 
@@ -41,5 +40,7 @@ public class PermissionDO implements Serializable {
     private LocalDateTime updateTime;
 
     private Boolean isDeleted;
+
+
 
 }

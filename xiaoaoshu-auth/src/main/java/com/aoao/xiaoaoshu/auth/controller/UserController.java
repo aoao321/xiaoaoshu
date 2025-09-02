@@ -21,5 +21,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PostMapping("/logout")
+    public Result logout() {
+        return userService.logout();
+    }
 
 }

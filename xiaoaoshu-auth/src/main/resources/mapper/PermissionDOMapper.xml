@@ -14,4 +14,14 @@
         WHERE p.is_deleted = 0
           AND u.phone = #{phone}
     </select>
+    <select id="selectByRoleIds" resultType="com.aoao.xiaoaoshu.auth.model.dto.RolePermissionDTO">
+        SELECT r.id roleId,p.*
+        FROM t_permission p
+                 LEFT JOIN t_role_permission_rel rp ON p.id = rp.permission_id AND p.is_deleted = 0
+                 LEFT JOIN t_role r ON rp.role_id = r.id AND rp.is_deleted=0
+        WHERE r.id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 </mapper>
