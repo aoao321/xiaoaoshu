@@ -1,5 +1,6 @@
 package com.aoao.xiaoaoshu.auth.controller;
 
+import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.auth.model.vo.user.UserLoginReqVO;
 import com.aoao.xiaoaoshu.auth.service.UserService;
@@ -22,6 +23,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/logout")
+    @Log(value = "账号登出")
     public Result logout() {
         return userService.logout();
     }

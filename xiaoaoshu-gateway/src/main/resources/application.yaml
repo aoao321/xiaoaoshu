@@ -1,18 +1,15 @@
 server:
-  port: 8080 # 项目启动的端口
-
-
-
-
-mybatis:
-  # MyBatis xml 配置文件路径
-  mapper-locations: classpath:/mapper/**/*.xml
-
-ali:
-  sms:
-    endpoint: dysmsapi.aliyuncs.com
-    sign-name: "阿里云短信测试"
-    template-code: "SMS_154950909"
+  port: 8081 # 指定启动端口
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth
+          uri: lb://xiaoaoshu-auth
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
 
 jwt:
   # 签发人
