@@ -1,7 +1,7 @@
 package com.aoao.xiaoaoshu.auth;
 
 import com.alibaba.druid.filter.config.ConfigTools;
-import com.aoao.xiaoaoshu.auth.properties.AliSmsProperties;
+import com.aoao.framework.common.properties.AliSmsProperties;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

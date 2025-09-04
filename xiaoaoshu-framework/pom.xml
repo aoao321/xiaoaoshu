@@ -22,6 +22,7 @@
         <module>xiaoaoshu-common</module>
         <module>xiaoaoshu-spring-boot-starter-biz-operationlog</module>
         <module>xiaoaoshu-spring-boot-starter-jackson</module>
+        <module>xiaoaoshu-spring-boot-starter-jwt</module>
     </modules>
 
 </project>

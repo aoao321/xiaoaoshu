@@ -1,8 +1,8 @@
 package com.aoao.xiaoaoshu.auth.authentication.provider;
 
 import com.aoao.framework.common.util.JsonUtil;
-import com.aoao.xiaoaoshu.auth.constant.RedisKeyConstants;
-import com.aoao.xiaoaoshu.auth.constant.RedisTimeConstants;
+import com.aoao.framework.common.constant.RedisKeyConstants;
+import com.aoao.framework.common.constant.RedisTimeConstants;
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
 import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;

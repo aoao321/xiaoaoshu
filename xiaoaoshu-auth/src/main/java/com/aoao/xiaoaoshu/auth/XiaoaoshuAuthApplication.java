@@ -7,12 +7,18 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+        "com.aoao.xiaoaoshu.gateway",
+        "com.aoao.framework.common",
+        "com.aoao.xiaoaoshu.auth"
+})
 @EnableConfigurationProperties
 @EnableAspectJAutoProxy(exposeProxy = true)
 @MapperScan("com.aoao.xiaoaoshu.auth.domain.mapper")
 @EnableDiscoveryClient
 public class XiaoaoshuAuthApplication {
-    public static void main(String[] args) {SpringApplication.run(XiaoaoshuAuthApplication.class, args);}
+    public static void main(String[] args) {
+        SpringApplication.run(XiaoaoshuAuthApplication.class, args);
+    }
 
 }

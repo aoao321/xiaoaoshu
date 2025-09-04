@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.auth.constant;
+package com.aoao.framework.common.constant;
 
 /**
  * @author aoao
@@ -29,8 +29,8 @@ public class RedisKeyConstants {
     /**
      * 构建token KEY
      */
-    public static String buildTokenKey(String phone) {
-        return TOKEN_KEY_PREFIX + phone;
+    public static String buildTokenKey(Long userId) {
+        return TOKEN_KEY_PREFIX + userId;
 
     }
 

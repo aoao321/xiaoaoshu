@@ -1,9 +1,9 @@
-package com.aoao.xiaoaoshu.auth.sms;
+package com.aoao.framework.common.util;
 
 import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.dysmsapi20170525.models.SendSmsRequest;
 import com.aliyun.dysmsapi20170525.models.SendSmsResponse;
-import com.aoao.xiaoaoshu.auth.properties.AliSmsProperties;
+import com.aoao.framework.common.properties.AliSmsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

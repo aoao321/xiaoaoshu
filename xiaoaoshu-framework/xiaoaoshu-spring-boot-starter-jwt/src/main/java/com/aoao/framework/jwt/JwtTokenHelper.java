@@ -1,12 +1,9 @@
-package com.aoao.xiaoaoshu.auth.util;
+package com.aoao.framework.jwt;
 
-import com.aoao.xiaoaoshu.auth.properties.JwtTokenProperties;
+import com.aoao.framework.jwt.properties.JwtTokenProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.stereotype.Component;
@@ -22,42 +19,27 @@ import java.util.Date;
  * @create 2025-08-23-22:36
  */
 @Component
-public class JwtTokenHelper implements InitializingBean {
+public class JwtTokenHelper {
 
-    @Autowired
-    private JwtTokenProperties jwtTokenProperties;
+    private final JwtTokenProperties jwtTokenProperties;
+    private final Key key;
+    private final JwtParser jwtParser;
 
-    /**
-     * 秘钥
-     */
-    private Key key;
+    public JwtTokenHelper(JwtTokenProperties jwtTokenProperties) {
+        this.jwtTokenProperties = jwtTokenProperties;
 
-    /**
-     * JWT 解析
-     */
-    private JwtParser jwtParser;
+        // 解析 secret
+        this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtTokenProperties.getSecret()));
 
-    /**
-     * 解码配置文件中配置的 Base 64 编码 key 为秘钥
-     * @param base64Key
-     */
-    @Value("${jwt.secret}")
-    public void setBase64Key(String base64Key) {
-        key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(base64Key));
-    }
-
-
-    /**
-     * 初始化 JwtParser
-     * @throws Exception
-     */
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        // 考虑到不同服务器之间可能存在时钟偏移，setAllowedClockSkewSeconds 用于设置能够容忍的最大的时钟误差
-        jwtParser = Jwts.parserBuilder().requireIssuer(jwtTokenProperties.getIssuer())
-                .setSigningKey(key).setAllowedClockSkewSeconds(10)
+        // 在构造器直接初始化 jwtParser
+        this.jwtParser = Jwts.parserBuilder()
+                .requireIssuer(jwtTokenProperties.getIssuer())
+                .setSigningKey(key)
+                .setAllowedClockSkewSeconds(10)
                 .build();
     }
+
+
 
     /**
      * 生成 Token

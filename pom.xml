@@ -53,11 +53,26 @@
     <hibernate-validator>8.0.1.Final</hibernate-validator>
     <pagehelper>1.4.6</pagehelper>
     <jjwt.version>0.11.5</jjwt.version>
-
+    <sms.version>4.1.1</sms.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-spring-boot-starter-jwt</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-gateway</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aliyun</groupId>
+        <artifactId>dysmsapi20170525</artifactId>
+        <version>${sms.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2</artifactId>

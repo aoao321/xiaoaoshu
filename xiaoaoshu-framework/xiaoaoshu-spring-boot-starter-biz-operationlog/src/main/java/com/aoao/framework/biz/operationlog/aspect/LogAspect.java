@@ -20,7 +20,7 @@ import java.util.UUID;
  * @create 2025-08-18-22:34
  */
 @Aspect
-@Component
+@Component("operationLogAspect")
 @Slf4j
 public class LogAspect {
 

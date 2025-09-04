@@ -3,16 +3,13 @@ package com.aoao.xiaoaoshu.auth.runner;
 import cn.hutool.core.collection.CollUtil;
 
 import com.aoao.framework.common.util.JsonUtil;
-import com.aoao.xiaoaoshu.auth.constant.RedisKeyConstants;
+import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.xiaoaoshu.auth.domain.entity.PermissionDO;
-import com.aoao.xiaoaoshu.auth.domain.entity.RolePermissionDO;
 import com.aoao.xiaoaoshu.auth.domain.mapper.PermissionDOMapper;
 import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
-import com.aoao.xiaoaoshu.auth.domain.mapper.RolePermissionDOMapper;
 import com.aoao.xiaoaoshu.auth.model.dto.RolePermissionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.redis.core.StringRedisTemplate;

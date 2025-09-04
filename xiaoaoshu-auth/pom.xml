@@ -19,6 +19,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-spring-boot-starter-jwt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
@@ -64,7 +68,6 @@
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>dysmsapi20170525</artifactId>
-            <version>4.1.1</version>
         </dependency>
         <!-- Redis -->
         <dependency>

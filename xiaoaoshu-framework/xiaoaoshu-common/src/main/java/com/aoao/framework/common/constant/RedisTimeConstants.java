@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.auth.constant;
+package com.aoao.framework.common.constant;
 
 /**
  * @author aoao
