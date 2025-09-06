@@ -44,7 +44,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         // 3.获取权限集合
         List<String> roles = roleDOMapper.findRoleByPhone(phone);
         // 4.把用户-角色存入redis中
-        String userRolesKey = RedisKeyConstants.buildUserRoleKey(phone);
+        String userRolesKey = RedisKeyConstants.buildUserRoleKey(userDO.getId().toString());
         stringRedisTemplate.opsForValue().set(userRolesKey, JsonUtil.toJson(roles), RedisTimeConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
         return new LoginUser(userDO,roles);
     }

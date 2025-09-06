@@ -68,7 +68,7 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
             List<String> roles = roleDOMapper.findRoleByPhone(phone);
             LoginUser loginUser = new LoginUser(user, roles);
             // 把用户-角色存入redis中
-            String userRolesKey = RedisKeyConstants.buildUserRoleKey(phone);
+            String userRolesKey = RedisKeyConstants.buildUserRoleKey(user.getId().toString());
             redisTemplate.opsForValue().set(userRolesKey, JsonUtil.toJson(roles), RedisTimeConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
             return new CodeAuthenticationToken(loginUser, code, loginUser.getAuthorities());
         } catch (BizException e) {

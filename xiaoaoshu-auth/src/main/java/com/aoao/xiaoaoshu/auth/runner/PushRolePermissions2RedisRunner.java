@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.xiaoaoshu.auth.domain.entity.PermissionDO;
+import com.aoao.xiaoaoshu.auth.domain.entity.RoleDO;
 import com.aoao.xiaoaoshu.auth.domain.mapper.PermissionDOMapper;
 import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
 import com.aoao.xiaoaoshu.auth.model.dto.RolePermissionDTO;
@@ -64,7 +65,8 @@ public class PushRolePermissions2RedisRunner implements CommandLineRunner {
                 }
                 // 3.同步redis
                 map.forEach((roleId, permissions) -> {
-                    String key = RedisKeyConstants.buildRolePermissionsKey(roleId);
+                    RoleDO roleDO = roleDOMapper.getById(roleId);
+                    String key = RedisKeyConstants.buildRolePermissionsKey(roleDO.getRoleKey());
                     stringRedisTemplate.opsForValue().set(key, JsonUtil.toJson(permissions));
                 });
             }

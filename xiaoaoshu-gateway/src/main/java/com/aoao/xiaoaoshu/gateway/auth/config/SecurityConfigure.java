@@ -22,8 +22,11 @@ public class SecurityConfigure {
                 // 2. 配置授权规则（按需调整，例如放行登录、健康检查接口）
                 .authorizeExchange(exchanges -> exchanges
                         // 放行白名单路径（无需认证）
-                        .pathMatchers("/auth/user/login", "/auth/verification/code/send", "/public/**")
+                        .pathMatchers(
+                                "/auth/**",
+                                "/public/**")
                         .permitAll()
+
                         // 其他所有请求需要认证（配合你的 Token 过滤器）
                         .anyExchange()
                         .authenticated()

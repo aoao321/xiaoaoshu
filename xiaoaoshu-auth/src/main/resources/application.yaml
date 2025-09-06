@@ -5,6 +5,8 @@ server:
 
 
 mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
   # MyBatis xml 配置文件路径
   mapper-locations: classpath:/mapper/**/*.xml
 

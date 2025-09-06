@@ -2,6 +2,7 @@ package com.aoao.xiaoaoshu.gateway.auth.filter;
 
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.result.Result;
+import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.framework.jwt.JwtTokenHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author aoao
@@ -39,7 +42,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             "/auth/user/login",          // 登录接口（核心，必须加）
             "/auth/verification/code/send" // 发送验证码接口（如果有）
     );
-    // 2. 路径匹配器（用于判断请求路径是否命中白名单）
+    // 路径匹配器（用于判断请求路径是否命中白名单）
     private final PathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
@@ -74,10 +77,32 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange, "Token非法或已过期");
         }
 
-        // ✅ 不解析用户信息，只透传 token
+        String id = jwtTokenHelper.getIdByToken(token);
+        String key = RedisKeyConstants.buildUserRoleKey(id);
+
+        // 获取redis中用户的角色
+        String roleListStr = redisTemplate.opsForValue().get(key);
+        // 解析为list
+        List<String> roleList = JsonUtil.fromJson(roleListStr, List.class);
+        // 遍历角色，获取权限
+        Set<String> permissions = new HashSet<>();
+        for (String role : roleList) {
+            String permKey = RedisKeyConstants.buildRolePermissionsKey(role);
+            String permListStr = redisTemplate.opsForValue().get(permKey);
+            if (StringUtils.isNotBlank(permListStr)) {
+                List<String> permList = JsonUtil.fromJson(permListStr, List.class);
+                permissions.addAll(permList);
+            }
+        }
+
+        // 传递给下游服务
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header("Authorization", "Bearer " + token)
+                .header("X-User-Id", id)
+                .header("X-User-Roles", String.join(",", roleList))
+                .header("X-User-Permissions", String.join(",", permissions))
                 .build();
+
 
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
