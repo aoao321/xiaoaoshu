@@ -1,0 +1,6 @@
+server:
+  port: 8082 # 指定启动端口
+
+logging:
+  file:
+    path: ./logs

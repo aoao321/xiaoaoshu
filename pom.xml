@@ -20,6 +20,8 @@
     <module>xiaoaoshu-framework</module>
     <module>xiaoaoshu-gateway</module>
       <module>xiaoaoshu-oss</module>
+    <module>xiaoaoshu-user</module>
+    <module>xiaoaoshu-user/xiaoaoshu-user-biz</module>
   </modules>
 
   <properties>
