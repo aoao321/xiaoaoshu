@@ -1,0 +1,11 @@
+server:
+  port: 8081 # 指定启动端口
+
+logging:
+  file:
+    path: ./logs
+
+storage:
+  type: aliyun # 对象存储类型
+
+

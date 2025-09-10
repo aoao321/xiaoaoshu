@@ -11,6 +11,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <revision>0.0.1-SNAPSHOT</revision>
+    </properties>
+    <groupId>com.aoao</groupId>
     <!-- 多模块项目需要配置打包方式为 pom -->
     <packaging>pom</packaging>
     <artifactId>xiaoaoshu-framework</artifactId>

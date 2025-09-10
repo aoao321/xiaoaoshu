@@ -1,5 +1,5 @@
 server:
-  port: 8081 # 指定启动端口
+  port: 8001 # 指定启动端口
 spring:
   cloud:
     gateway:

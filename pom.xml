@@ -6,7 +6,7 @@
 
   <groupId>com.aoao</groupId>
   <artifactId>xiaoaoshu</artifactId>
-  <version>${revision}</version>
+  <version>0.0.1-SNAPSHOT</version>
 
 
   <name>xiaoaoshu</name>
@@ -19,6 +19,7 @@
     <module>xiaoaoshu-auth</module>
     <module>xiaoaoshu-framework</module>
     <module>xiaoaoshu-gateway</module>
+      <module>xiaoaoshu-oss</module>
   </modules>
 
   <properties>
@@ -54,10 +55,23 @@
     <pagehelper>1.4.6</pagehelper>
     <jjwt.version>0.11.5</jjwt.version>
     <sms.version>4.1.1</sms.version>
+    <minio.version>8.2.1</minio.version>
+    <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.aliyun.oss</groupId>
+        <artifactId>aliyun-sdk-oss</artifactId>
+        <version>${aliyun.sdk.oss}</version>
+      </dependency>
+      <!-- 对象存储 Minio -->
+      <dependency>
+        <groupId>io.minio</groupId>
+        <artifactId>minio</artifactId>
+        <version>${minio.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-spring-boot-starter-jwt</artifactId>

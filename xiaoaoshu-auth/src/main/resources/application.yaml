@@ -10,12 +10,6 @@ mybatis:
   # MyBatis xml 配置文件路径
   mapper-locations: classpath:/mapper/**/*.xml
 
-ali:
-  sms:
-    endpoint: dysmsapi.aliyuncs.com
-    sign-name: "阿里云短信测试"
-    template-code: "SMS_154950909"
-
 jwt:
   # 签发人
   issuer: aoao

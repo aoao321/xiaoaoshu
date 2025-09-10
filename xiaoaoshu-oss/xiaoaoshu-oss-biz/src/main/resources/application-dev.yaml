@@ -1,0 +1,9 @@
+
+storage:
+  minio:
+    endpoint: http://127.0.0.1:9000
+    accessKey: aoao1234
+    secretKey: aoao1234
+  ali:
+    oss:
+      endpoint: oss-cn-guangzhou.aliyuncs.com

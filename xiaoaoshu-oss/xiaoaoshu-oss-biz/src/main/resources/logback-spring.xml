@@ -6,7 +6,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
 
     <!-- 应用名称 -->
-    <property name="appName" value="xiaoaoshu-auth" />
+    <property name="appName" value="xiaoaoshu-oss" />
     <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n" />
 
     <!-- 文件日志输出 -->

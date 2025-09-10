@@ -1,3 +1,11 @@
+ali:
+  sms:
+    endpoint: dysmsapi.aliyuncs.com
+
+    sign-name: "阿里云短信测试"
+    template-code: "SMS_154950909"
+
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类
