@@ -5,7 +5,5 @@ logging:
   file:
     path: ./logs
 
-storage:
-  type: aliyun # 对象存储类型
 
 

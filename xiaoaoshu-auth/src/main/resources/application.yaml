@@ -2,8 +2,6 @@ server:
   port: 8080 # 项目启动的端口
 
 
-
-
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

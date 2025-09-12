@@ -4,8 +4,7 @@ import com.aoao.framework.jwt.properties.JwtTokenProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.CredentialsExpiredException;
+
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -40,9 +39,9 @@ public class JwtTokenHelper {
     }
 
 
-
     /**
      * 生成 Token
+     *
      * @param username
      * @return
      */
@@ -61,21 +60,17 @@ public class JwtTokenHelper {
 
     /**
      * 解析 Token
+     *
      * @param token
      * @return
      */
     public Jws<Claims> parseToken(String token) {
-        try {
-            return jwtParser.parseClaimsJws(token);
-        } catch (ExpiredJwtException e) {
-            throw new CredentialsExpiredException("Token 失效", e);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new BadCredentialsException("Token 不可用", e);
-        }
+        return jwtParser.parseClaimsJws(token);
     }
 
     /**
      * 校验 Token 是否可用
+     *
      * @param token
      * @return
      */
@@ -85,6 +80,7 @@ public class JwtTokenHelper {
 
     /**
      * 解析 Token 获取用户名
+     *
      * @param token
      * @return
      */

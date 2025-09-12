@@ -14,19 +14,28 @@ public enum ResponseCodeEnum {
 
     // ----------- 业务异常状态码 -----------
     PRODUCT_NOT_FOUND("20000", "该产品不存在（测试使用）"),
-
     PARAM_NOT_VALID("10001","参数验证错误"),
 
-    VERIFICATION_CODE_SEND_FREQUENTLY("40000", "请求太频繁，请3分钟后再试"),
-    VERIFICATION_CODE_USELESS("40001", "验证码不存在或已过期"),
-    VERIFICATION_CODE_ERROR("40002", "验证码错误"),
-    PASSWORD_ERROR("50000", "密码或验证码错误"),
-    USERNAME_OR_PWD_IS_NULL("20003","用户名或密码为空"),
-    LOGIN_FAIL("40005", "登录失败"),
-    FORBIDDEN("50005", "权限不足"),
-    UNAUTHORIZED("20002","用户未授权"),
-    PHONE_ERROR("40010", "手机号格式不正确，必须是 11 位数字"),
-    TYPE_ERROR("40015", "登录方式错误");
+    VERIFICATION_CODE_SEND_FREQUENTLY("AUTH-40000", "请求太频繁，请3分钟后再试"),
+    VERIFICATION_CODE_USELESS("AUTH-40001", "验证码不存在或已过期"),
+    VERIFICATION_CODE_ERROR("AUTH-40002", "验证码错误"),
+    PASSWORD_ERROR("AUTH-50000", "密码或验证码错误"),
+    USERNAME_OR_PWD_IS_NULL("AUTH-20003","用户名或密码为空"),
+    LOGIN_FAIL("AUTH-40005", "登录失败"),
+    FORBIDDEN("AUTH-50005", "权限不足"),
+    UNAUTHORIZED("AUTH-20002","用户未授权"),
+    PHONE_ERROR("AUTH-40010", "手机号格式不正确，必须是 11 位数字"),
+    TYPE_ERROR("AUTH-40015", "登录方式错误"),
+
+
+
+    NICK_NAME_VALID_FAIL("USER-20001", "昵称请设置2-24个字符，不能使用@《/等特殊字符"),
+    XIAOHASHU_ID_VALID_FAIL("USER-20002", "小哈书号请设置6-15个字符，仅可使用英文（必须）、数字、下划线"),
+    SEX_VALID_FAIL("USER-20003", "性别错误"),
+    INTRODUCTION_VALID_FAIL("USER-20004", "个人简介请设置1-100个字符"),;
+
+
+
 
     ResponseCodeEnum(String errorCode, String errorMessage) {
         this.errorCode = errorCode;
