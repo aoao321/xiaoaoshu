@@ -27,6 +27,7 @@
         <module>xiaoaoshu-spring-boot-starter-biz-operationlog</module>
         <module>xiaoaoshu-spring-boot-starter-jackson</module>
         <module>xiaoaoshu-spring-boot-starter-jwt</module>
+        <module>xiaoaoshu-spring-boot-starter-biz-context</module>
     </modules>
 
 </project>

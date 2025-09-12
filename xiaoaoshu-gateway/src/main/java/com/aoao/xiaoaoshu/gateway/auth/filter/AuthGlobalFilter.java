@@ -1,5 +1,6 @@
 package com.aoao.xiaoaoshu.gateway.auth.filter;
 
+import com.aoao.framework.common.constant.GlobalConstants;
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.JsonUtil;
@@ -97,10 +98,10 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
         // 传递给下游服务
         ServerHttpRequest mutatedRequest = request.mutate()
-                .header("Authorization", "Bearer " + token)
-                .header("X-User-Id", id)
-                .header("X-User-Roles", String.join(",", roleList))
-                .header("X-User-Permissions", String.join(",", permissions))
+                .header(GlobalConstants.AUTHORIZATION, "Bearer " + token)
+                .header(GlobalConstants.USER_ID, id)
+                .header(GlobalConstants.USER_ROLES, String.join(",", roleList))
+                .header(GlobalConstants.USER_PERMISSIONS, String.join(",", permissions))
                 .build();
 
 
