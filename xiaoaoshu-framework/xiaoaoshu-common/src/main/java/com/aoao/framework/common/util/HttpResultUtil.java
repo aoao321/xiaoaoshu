@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.auth.util;
+package com.aoao.framework.common.util;
 
 
 import com.aoao.framework.common.result.Result;

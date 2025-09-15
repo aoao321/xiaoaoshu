@@ -1,5 +1,8 @@
 package com.aoao.framework.biz.context.holder;
 
+import com.aoao.framework.biz.context.model.LoginUser;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -8,17 +11,36 @@ import java.util.Map;
  */
 public class LoginUserContextHolder {
 
-    public static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<LoginUser> threadLocal = new ThreadLocal<>();
 
-    public static void setCurrentId(Long id) {
-        threadLocal.set(id);
+    public static void set(LoginUser loginUser) {
+        threadLocal.set(loginUser);
     }
 
-    public static Long getCurrentId() {
+    public static LoginUser get() {
         return threadLocal.get();
     }
 
-    public static void removeCurrentId() {
+    public static void remove() {
         threadLocal.remove();
     }
+
+    // 便捷方法
+    public static Long getCurrentId() {
+        LoginUser user = threadLocal.get();
+        return user != null ? user.getUserId() : null;
+    }
+
+    public static List<String> getCurrentRoles() {
+        LoginUser user = threadLocal.get();
+        return user != null ? user.getRoles() : null;
+    }
+
+    public static List<String> getCurrentPermissions() {
+        LoginUser user = threadLocal.get();
+        return user != null ? user.getPermissions() : null;
+    }
+
+
 }
+

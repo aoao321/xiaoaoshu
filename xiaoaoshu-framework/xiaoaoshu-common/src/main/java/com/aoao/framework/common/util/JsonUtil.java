@@ -1,6 +1,7 @@
 package com.aoao.framework.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -37,9 +38,9 @@ public class JsonUtil {
         }
     }
 
-    public static <T> T fromJson(String json, Class<T> clazz) {
+    public static <T> T fromJson(String json, TypeReference<T> typeRef) {
         try {
-            return MAPPER.readValue(json,clazz);
+            return MAPPER.readValue(json,typeRef);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -2,7 +2,7 @@ package com.aoao.xiaoaoshu.auth.authentication.handler;
 
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.auth.util.HttpResultUtil;
+import com.aoao.framework.common.util.HttpResultUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

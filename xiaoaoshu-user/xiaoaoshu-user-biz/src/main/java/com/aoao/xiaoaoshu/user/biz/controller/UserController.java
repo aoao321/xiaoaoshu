@@ -5,10 +5,9 @@ import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author aoao
@@ -22,8 +21,8 @@ public class UserController {
     private UserService userService;
 
     @Log(value = "用户修改信息")
-    @PostMapping("/update")
-    public Result updateUserInfo(@RequestBody UpdateUserInfoReqVO updateUserInfoReqVO) {
+    @PostMapping(value = "/update" ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Result updateUserInfo(@ModelAttribute @Validated UpdateUserInfoReqVO updateUserInfoReqVO) {
         return userService.update(updateUserInfoReqVO);
     }
 

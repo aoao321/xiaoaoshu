@@ -31,28 +31,47 @@ public class LogAspect {
     // 增强日志
     @Around("log()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        // 获取现在时间
         long startTime = System.currentTimeMillis();
-        // MDC
         MDC.put("traceId", UUID.randomUUID().toString());
-        // 获取类和方法
+
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = joinPoint.getSignature().getName();
-        // 获取参数
         Object[] args = joinPoint.getArgs();
-        String argsStr = JsonUtil.toJson(args);
-        // 获取注解中的value注释
+
+        // 处理参数
+        StringBuilder argsStrBuilder = new StringBuilder("[");
+        for (Object arg : args) {
+            if (arg instanceof org.springframework.web.multipart.MultipartFile file) {
+                argsStrBuilder.append("{MultipartFile: name=")
+                        .append(file.getOriginalFilename())
+                        .append(", size=")
+                        .append(file.getSize())
+                        .append("}, ");
+            } else {
+                try {
+                    argsStrBuilder.append(JsonUtil.toJson(arg)).append(", ");
+                } catch (Exception e) {
+                    argsStrBuilder.append("{unserializable-arg: ").append(arg).append("}, ");
+                }
+            }
+        }
+        if (argsStrBuilder.length() > 1) {
+            argsStrBuilder.setLength(argsStrBuilder.length() - 2); // 去掉最后的逗号
+        }
+        argsStrBuilder.append("]");
+        String argsStr = argsStrBuilder.toString();
+
         String value = getValue(joinPoint);
-        // 执行方法
+
         Object result = joinPoint.proceed();
+
         log.info("====== 请求开始: [{}], 入参: {}, 请求类: {}, 请求方法: {} ====== ",
                 value, argsStr, className, methodName);
 
-        // 结束计算消耗时间
         long endTime = System.currentTimeMillis();
 
         log.info("====== 请求结束: [{}], 耗时: {}ms, 出参: {} ====== ",
-                value, (endTime-startTime), JsonUtil.toJson(result));
+                value, (endTime - startTime), JsonUtil.toJson(result));
 
         return result;
     }

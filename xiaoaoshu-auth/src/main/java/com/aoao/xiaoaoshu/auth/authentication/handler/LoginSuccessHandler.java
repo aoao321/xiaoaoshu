@@ -6,7 +6,7 @@ import com.aoao.framework.common.constant.RedisTimeConstants;
 import com.aoao.framework.jwt.JwtTokenHelper;
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
-import com.aoao.xiaoaoshu.auth.util.HttpResultUtil;
+import com.aoao.framework.common.util.HttpResultUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

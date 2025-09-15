@@ -29,7 +29,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
 
     // 登录路径拦截
     public AuthenticationFilter(AuthenticationManager authenticationManager) {
-        super(new AntPathRequestMatcher("/user/login", "POST"));
+        super(new AntPathRequestMatcher("/login", "POST"));
         setAuthenticationManager(authenticationManager);
     }
 
