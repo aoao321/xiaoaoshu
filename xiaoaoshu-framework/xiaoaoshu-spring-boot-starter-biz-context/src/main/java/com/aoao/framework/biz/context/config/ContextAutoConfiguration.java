@@ -4,6 +4,11 @@ import com.aoao.framework.biz.context.filter.GetUserId2ContextFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 
 /**
  * @author aoao
@@ -13,10 +18,17 @@ import org.springframework.context.annotation.Configuration;
 public class ContextAutoConfiguration {
 
     @Bean
-    public FilterRegistrationBean<GetUserId2ContextFilter> filterFilterRegistrationBean() {
-        GetUserId2ContextFilter getUserId2ContextFilter = new GetUserId2ContextFilter();
-        FilterRegistrationBean<GetUserId2ContextFilter> filterRegistrationBean = new FilterRegistrationBean<>(getUserId2ContextFilter);
-        return filterRegistrationBean;
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().authenticated()
+                );
+
+        // 将自定义 filter 加入 Spring Security 链，放在 UsernamePasswordAuthenticationFilter 前
+        http.addFilterBefore(new GetUserId2ContextFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
 }

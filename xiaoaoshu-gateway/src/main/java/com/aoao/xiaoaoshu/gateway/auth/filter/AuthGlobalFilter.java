@@ -2,9 +2,14 @@ package com.aoao.xiaoaoshu.gateway.auth.filter;
 
 import com.aoao.framework.common.constant.GlobalConstants;
 import com.aoao.framework.common.constant.RedisKeyConstants;
+
 import com.aoao.framework.common.result.Result;
+import com.aoao.framework.common.util.HttpResultUtil;
 import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.framework.jwt.JwtTokenHelper;
+import com.aoao.xiaoaoshu.gateway.auth.model.PermissionDO;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -26,6 +31,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author aoao
@@ -40,7 +46,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private StringRedisTemplate redisTemplate;
 
     private final List<String> WHITE_LIST = Arrays.asList(
-            "/auth/user/login",          // 登录接口（核心，必须加）
+            "/auth/login",          // 登录接口（核心，必须加）
             "/auth/verification/code/send" // 发送验证码接口（如果有）
     );
     // 路径匹配器（用于判断请求路径是否命中白名单）
@@ -75,7 +81,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 return unauthorized(exchange, "Token已失效");
             }
         } catch (Exception e) {
-            return unauthorized(exchange, "Token非法或已过期");
+            return unauthorized(exchange, "未登录");
         }
 
         String id = jwtTokenHelper.getIdByToken(token);
@@ -84,24 +90,29 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         // 获取redis中用户的角色
         String roleListStr = redisTemplate.opsForValue().get(key);
         // 解析为list
-        List<String> roleList = JsonUtil.fromJson(roleListStr, List.class);
+        List<String> roleList = JsonUtil.fromJson(roleListStr, new TypeReference<List<String>>() {});
+
         // 遍历角色，获取权限
-        Set<String> permissions = new HashSet<>();
+        Set<PermissionDO> permissions = new HashSet<>();
         for (String role : roleList) {
             String permKey = RedisKeyConstants.buildRolePermissionsKey(role);
             String permListStr = redisTemplate.opsForValue().get(permKey);
             if (StringUtils.isNotBlank(permListStr)) {
-                List<String> permList = JsonUtil.fromJson(permListStr, List.class);
+                List<PermissionDO> permList = JsonUtil.fromJson(permListStr, new TypeReference<List<PermissionDO>>() {});
                 permissions.addAll(permList);
             }
         }
+        // 使用 permissionKey 生成下游 header
+        String permsHeader = permissions.stream()
+                .map(PermissionDO::getPermissionKey)
+                .collect(Collectors.joining(","));
 
         // 传递给下游服务
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header(GlobalConstants.AUTHORIZATION, "Bearer " + token)
                 .header(GlobalConstants.USER_ID, id)
                 .header(GlobalConstants.USER_ROLES, String.join(",", roleList))
-                .header(GlobalConstants.USER_PERMISSIONS, String.join(",", permissions))
+                .header(GlobalConstants.USER_PERMISSIONS, permsHeader)
                 .build();
 
 
@@ -110,15 +121,22 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String msg) {
         ServerHttpResponse response = exchange.getResponse();
-        // 设置响应为JSON格式
         response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
 
-        // 构造统一JSON响应（示例：与你的Result类格式匹配）
-        String json = "{\"code\":401,\"message\":\"" + msg + "\",\"data\":null}";
-        DataBuffer buffer = response.bufferFactory().wrap(json.getBytes(StandardCharsets.UTF_8));
+        Result<?> result = Result.fail(msg);
+
+        byte[] bytes;
+        try {
+            bytes = new ObjectMapper().writeValueAsBytes(result);
+        } catch (Exception e) {
+            bytes = ("{\"code\":500,\"message\":\"序列化失败\",\"data\":null}").getBytes(StandardCharsets.UTF_8);
+        }
+
+        DataBuffer buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
     }
+
 
     @Override
     public int getOrder() {
