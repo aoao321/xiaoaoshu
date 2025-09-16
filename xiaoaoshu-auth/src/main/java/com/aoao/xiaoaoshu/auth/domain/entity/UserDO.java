@@ -22,7 +22,7 @@ public class UserDO {
     /**
      * 小奥数ID
      */
-    private String xiaohashuId;
+    private String xiaoaoshuId;
 
     /**
      * 密码

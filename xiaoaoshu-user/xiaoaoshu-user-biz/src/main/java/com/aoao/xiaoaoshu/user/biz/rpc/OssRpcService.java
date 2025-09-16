@@ -23,7 +23,6 @@ public class OssRpcService {
         if (!response.isSuccess()) {
             return null;
         }
-
         // 返回图片访问链接
         return (String) response.getData();
     }

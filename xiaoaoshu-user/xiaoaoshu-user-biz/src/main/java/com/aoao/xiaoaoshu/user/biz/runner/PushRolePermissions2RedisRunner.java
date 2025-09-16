@@ -1,14 +1,13 @@
-package com.aoao.xiaoaoshu.auth.runner;
+package com.aoao.xiaoaoshu.user.biz.runner;
 
 import cn.hutool.core.collection.CollUtil;
-
-import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.framework.common.constant.RedisKeyConstants;
-import com.aoao.xiaoaoshu.auth.domain.entity.PermissionDO;
-import com.aoao.xiaoaoshu.auth.domain.entity.RoleDO;
-import com.aoao.xiaoaoshu.auth.domain.mapper.PermissionDOMapper;
-import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
-import com.aoao.xiaoaoshu.auth.model.dto.RolePermissionDTO;
+import com.aoao.framework.common.util.JsonUtil;
+import com.aoao.xiaoaoshu.user.biz.domain.entity.PermissionDO;
+import com.aoao.xiaoaoshu.user.biz.domain.entity.RoleDO;
+import com.aoao.xiaoaoshu.user.biz.domain.mapper.PermissionDOMapper;
+import com.aoao.xiaoaoshu.user.biz.domain.mapper.RoleDOMapper;
+import com.aoao.xiaoaoshu.user.biz.model.dto.RolePermissionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +72,7 @@ public class PushRolePermissions2RedisRunner implements CommandLineRunner {
             log.info("==> 服务启动，成功同步角色权限数据到 Redis 中...");
         } catch (Exception e) {
             log.error("==> 同步角色权限数据到 Redis 中失败: ", e);
+            stringRedisTemplate.delete(PUSH_PERMISSION_FLAG); // 回滚
         }
 
     }
