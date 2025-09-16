@@ -60,10 +60,17 @@
     <minio.version>8.2.1</minio.version>
     <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
     <jakarta.version>6.0.0</jakarta.version>
+    <feign-form.version>3.8.0</feign-form.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Feign 表单提交 -->
+      <dependency>
+        <groupId>io.github.openfeign.form</groupId>
+        <artifactId>feign-form</artifactId>
+        <version>${feign-form.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-oss-api</artifactId>

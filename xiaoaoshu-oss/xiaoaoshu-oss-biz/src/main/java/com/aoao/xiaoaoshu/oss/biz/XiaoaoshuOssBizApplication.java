@@ -11,7 +11,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.aoao.xiaoaoshu")
 public class XiaoaoshuOssBizApplication {
     public static void main(String[] args) {
         SpringApplication.run(XiaoaoshuOssBizApplication.class, args);

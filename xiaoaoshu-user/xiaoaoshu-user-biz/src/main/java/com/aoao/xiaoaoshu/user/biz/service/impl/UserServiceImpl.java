@@ -4,12 +4,14 @@ import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.enums.SexEnum;
+import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.ParamUtils;
 import com.aoao.xiaoaoshu.oss.api.FileFeignApi;
 import com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserDOMapper;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
+import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDOMapper userDOMapper;
     @Autowired
-    private FileFeignApi fileFeignApi;
+    private OssRpcService ossRpcService;
+
 
     @Override
     public Result update(UpdateUserInfoReqVO updateUserInfoReqVO) {
@@ -42,8 +45,13 @@ public class UserServiceImpl implements UserService {
         // 头像
         MultipartFile avatarFile = updateUserInfoReqVO.getAvatar();
         if (Objects.nonNull(avatarFile)) {
-            // todo: 调用对象存储服务上传文件
-            fileFeignApi.test();
+            // 调用对象存储服务上传文件
+            String url = ossRpcService.uploadFile(avatarFile);
+            if (StringUtils.isBlank(url)) {
+                throw new BizException(ResponseCodeEnum.UPLOAD_AVATAR_FAIL);
+            }
+            userDO.setAvatar(url);
+            needUpdate = true;
         }
 
         // 昵称
@@ -88,8 +96,13 @@ public class UserServiceImpl implements UserService {
         // 背景图
         MultipartFile backgroundImg = updateUserInfoReqVO.getBackgroundImg();
         if (Objects.nonNull(backgroundImg)) {
-            // todo: 调用oss
-
+            // 调用oss
+            String url = ossRpcService.uploadFile(backgroundImg);
+            if (StringUtils.isBlank(url)) {
+                throw new BizException(ResponseCodeEnum.UPLOAD_BACKGROUND_IMG_FAIL);
+            }
+            userDO.setBackgroundImg(url);
+            needUpdate = true;
         }
 
         if (needUpdate) {
