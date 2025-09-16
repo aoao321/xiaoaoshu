@@ -1,1 +1,2 @@
 com.aoao.framework.biz.context.config.ContextAutoConfiguration
+com.aoao.framework.biz.context.config.FeignContextAutoConfiguration
