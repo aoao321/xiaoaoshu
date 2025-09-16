@@ -13,11 +13,16 @@ import com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO;
 import com.aoao.xiaoaoshu.user.biz.domain.entity.UserRoleDO;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserDOMapper;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserRoleDOMapper;
-import com.aoao.xiaoaoshu.user.model.dto.RegisterUserReqDTO;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -75,7 +80,7 @@ public class UserServiceImpl implements UserService {
         // 小哈书号
         String xiaoaoshuId = updateUserInfoReqVO.getXiaoaoshuId();
         if (StringUtils.isNotBlank(xiaoaoshuId)) {
-            Preconditions.checkArgument(ParamUtils.checkXiaoaoshuId(xiaoaoshuId), ResponseCodeEnum.XIAOHASHU_ID_VALID_FAIL.getErrorMessage());
+            Preconditions.checkArgument(ParamUtils.checkXiaoaoshuId(xiaoaoshuId), ResponseCodeEnum.XIAOAOSHU_ID_VALID_FAIL.getErrorMessage());
             userDO.setXiaoaoshuId(xiaoaoshuId);
             needUpdate = true;
         }
@@ -148,4 +153,31 @@ public class UserServiceImpl implements UserService {
 
         return Result.success(userId);
     }
+
+    @Override
+    public Result<FindUserByPhoneRspDTO> findByPhone(FindUserByPhoneReqDTO findUserByPhoneReqDTO) {
+        String phone = findUserByPhoneReqDTO.getPhone();
+        UserDO userDO = userDOMapper.getByPhone(phone);
+        if (Objects.isNull(userDO)) {
+            return Result.fail(ResponseCodeEnum.ABSENT_USER);
+        }
+        FindUserByPhoneRspDTO findUserByPhoneRspDTO = new FindUserByPhoneRspDTO();
+        BeanUtils.copyProperties(userDO, findUserByPhoneRspDTO);
+        return Result.success(findUserByPhoneRspDTO);
+    }
+
+    @Override
+    public Result<FindUserByIdRspDTO> findById(FindUserByIdReqDTO findUserByIdReqDTO) {
+        Long id = findUserByIdReqDTO.getId();
+        UserDO userDO = userDOMapper.getById(id);
+        if (Objects.isNull(userDO)) {
+            return Result.fail(ResponseCodeEnum.ABSENT_USER);
+        }
+        FindUserByIdRspDTO findUserByIdRspDTO = new FindUserByIdRspDTO();
+        BeanUtils.copyProperties(userDO, findUserByIdRspDTO);
+        return Result.success(findUserByIdRspDTO);
+
+    }
+
+
 }

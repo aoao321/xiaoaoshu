@@ -1,8 +1,12 @@
 package com.aoao.xiaoaoshu.user.biz.service;
 
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.user.model.dto.RegisterUserReqDTO;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 
 /**
  * @author aoao
@@ -12,4 +16,8 @@ public interface UserService {
     Result update(UpdateUserInfoReqVO updateUserInfoReqVO);
 
     Result<Long> register(RegisterUserReqDTO registerUserReqDTO);
+
+    Result<FindUserByPhoneRspDTO> findByPhone(FindUserByPhoneReqDTO findUserByPhoneReqDTO);
+
+    Result<FindUserByIdRspDTO> findById(FindUserByIdReqDTO findUserByIdReqDTO);
 }

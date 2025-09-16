@@ -1,20 +1,18 @@
 package com.aoao.xiaoaoshu.auth.authentication.filter;
 
-import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.jwt.JwtTokenHelper;
 import com.aoao.framework.jwt.properties.JwtTokenProperties;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
-import com.aoao.xiaoaoshu.auth.domain.mapper.UserDOMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
+import com.aoao.xiaoaoshu.auth.rpc.UserRpcService;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,7 +41,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private JwtTokenProperties jwtTokenProperties;
 
     @Autowired
-    private UserDOMapper userDOMapper;
+    private UserRpcService userRpcService;
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -66,7 +64,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                         && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
 
                     // 查询用户信息
-                    UserDO user = userDOMapper.getById(Long.valueOf(userId));
+                    FindUserByIdRspDTO userDTO = userRpcService.findUserById(Long.valueOf(userId));
+                    UserDO user = new UserDO();
+                    BeanUtils.copyProperties(userDTO, user);
                     if (user == null) {
                         throw new AuthenticationServiceException("用户不存在");
                     }

@@ -2,12 +2,9 @@ package com.aoao.xiaoaoshu.auth.controller;
 
 import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.auth.model.vo.user.UserLoginReqVO;
-import com.aoao.xiaoaoshu.auth.service.UserService;
+import com.aoao.xiaoaoshu.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private AuthService userService;
 
     @PostMapping("/logout")
     @Log(value = "账号登出")

@@ -8,10 +8,10 @@ import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.constant.RedisTimeConstants;
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
-import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
-import com.aoao.xiaoaoshu.auth.domain.mapper.UserDOMapper;
-import com.aoao.xiaoaoshu.auth.domain.mapper.UserRoleDOMapper;
 import com.aoao.xiaoaoshu.auth.rpc.UserRpcService;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserRoleByPhoneRspDTO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -32,12 +33,6 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
-    @Autowired
-    private RoleDOMapper roleDOMapper;
-    @Autowired
-    private UserDOMapper userDOMapper;
-    @Autowired
-    private UserRoleDOMapper userRoleDOMapper;
     @Autowired
     private UserRpcService userRpcService;
 
@@ -58,7 +53,7 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
             }
             redisTemplate.delete(key);
 
-            UserDO user = userDOMapper.getByPhone(phone);
+            FindUserByPhoneRspDTO user = userRpcService.findUserByPhone(phone);
             if (user == null) {
                 // 调用user服务注册
                 Long userIdTmp = userRpcService.register(phone);
@@ -67,8 +62,13 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
                     throw new BizException(ResponseCodeEnum.LOGIN_FAIL);
                 }
             }
-            List<String> roles = roleDOMapper.findRoleByPhone(phone);
-            LoginUser loginUser = new LoginUser(user, roles);
+            List<FindUserRoleByPhoneRspDTO> findUserRoleByPhoneRspDTOS = userRpcService.findUserRoleByPhone(phone);
+            List<String> roles = new ArrayList<>();
+            findUserRoleByPhoneRspDTOS.stream().forEach(findUserRoleByPhoneRspDTO -> {roles.add(findUserRoleByPhoneRspDTO.getRoleKey());});
+            // 获取用户
+            UserDO userDO = new UserDO();
+            BeanUtils.copyProperties(user, userDO);
+            LoginUser loginUser = new LoginUser(userDO, roles);
             // 把用户-角色存入redis中
             String userRolesKey = RedisKeyConstants.buildUserRoleKey(user.getId().toString());
             redisTemplate.opsForValue().set(userRolesKey, JsonUtil.toJson(roles), RedisTimeConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);

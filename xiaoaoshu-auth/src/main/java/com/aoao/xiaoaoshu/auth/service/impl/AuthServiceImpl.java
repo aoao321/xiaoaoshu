@@ -1,9 +1,7 @@
 package com.aoao.xiaoaoshu.auth.service.impl;
 
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.auth.domain.mapper.UserDOMapper;
-import com.aoao.xiaoaoshu.auth.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.aoao.xiaoaoshu.auth.service.AuthService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,11 +9,7 @@ import org.springframework.stereotype.Service;
  * @create 2025-08-24-14:42
  */
 @Service
-public class UserServiceImpl implements UserService {
-
-    @Autowired
-    private UserDOMapper userDOMapper;
-
+public class AuthServiceImpl implements AuthService {
 
     @Override
     public Result logout() {

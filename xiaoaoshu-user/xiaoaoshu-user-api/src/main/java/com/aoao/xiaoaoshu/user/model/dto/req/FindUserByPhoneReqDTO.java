@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.user.model.dto;
+package com.aoao.xiaoaoshu.user.model.dto.req;
 
 import com.aoao.framework.common.validator.PhoneNumber;
 import jakarta.validation.constraints.NotBlank;
@@ -7,15 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @author aoao
- * @create 2025-09-16-16:19
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterUserReqDTO {
+public class FindUserByPhoneReqDTO {
 
     /**
      * 手机号

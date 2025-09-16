@@ -2,10 +2,18 @@ package com.aoao.xiaoaoshu.user.api;
 
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.constant.ApiConstants;
-import com.aoao.xiaoaoshu.user.model.dto.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindUserRoleByPhoneReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserRoleByPhoneRspDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 /**
  * @author aoao
@@ -15,13 +23,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface UserFeignApi {
     String PREFIX = "/user";
 
-    /**
-     * 用户注册
-     *
-     * @param registerUserReqDTO
-     * @return
-     */
+    @PostMapping(value = PREFIX + "/findById")
+    Result<FindUserByIdRspDTO> findById(@RequestBody FindUserByIdReqDTO findUserByIdReqDTO);
+
     @PostMapping(value = PREFIX + "/register")
     Result<Long> registerUser(@RequestBody RegisterUserReqDTO registerUserReqDTO);
 
+    @PostMapping(value = PREFIX + "/findByPhone")
+    Result<FindUserByPhoneRspDTO> findUserByPhone(@RequestBody FindUserByPhoneReqDTO findUserByPhoneReqDTO);
+
+    @PostMapping(value = PREFIX + "/role/findRoleByPhone")
+    Result<List<FindUserRoleByPhoneRspDTO>> findUserRoleByPhone(@RequestBody FindUserRoleByPhoneReqDTO findUserRoleByPhoneReqDTO);
 }
