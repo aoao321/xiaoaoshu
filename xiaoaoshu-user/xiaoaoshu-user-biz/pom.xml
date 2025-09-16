@@ -8,7 +8,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.aoao.xiaoaoshu.user.biz</groupId>
+    <groupId>com.aoao</groupId>
     <artifactId>xiaoaoshu-user-biz</artifactId>
     <packaging>jar</packaging>
 
@@ -20,6 +20,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-user-api</artifactId>
+        </dependency>
         <!-- Redis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

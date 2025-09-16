@@ -18,6 +18,15 @@
     <description>小傲书：认证服务（负责处理用户登录、注册、账号注销等）</description>
 
     <dependencies>
+        <!-- OpenFeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-user-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.aoao</groupId>
             <artifactId>xiaoaoshu-spring-boot-starter-jwt</artifactId>

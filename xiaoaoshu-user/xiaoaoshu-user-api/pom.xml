@@ -7,7 +7,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.aoao.xiaoaoshu.user.api</groupId>
+    <groupId>com.aoao</groupId>
     <artifactId>xiaoaoshu-user-api</artifactId>
     <packaging>jar</packaging>
     <description>RPC层, 供其他服务调用</description>
@@ -20,6 +20,18 @@
     </properties>
 
     <dependencies>
+        <!-- OpenFeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <!-- 负载均衡 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.aoao</groupId>
             <artifactId>xiaoaoshu-common</artifactId>

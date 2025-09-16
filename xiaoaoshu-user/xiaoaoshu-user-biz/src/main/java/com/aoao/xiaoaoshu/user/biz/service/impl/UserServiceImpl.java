@@ -2,19 +2,25 @@ package com.aoao.xiaoaoshu.user.biz.service.impl;
 
 import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
+import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.enums.SexEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.ParamUtils;
-import com.aoao.xiaoaoshu.oss.api.FileFeignApi;
+import com.aoao.xiaoaoshu.user.biz.constant.RoleConstants;
 import com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO;
+import com.aoao.xiaoaoshu.user.biz.domain.entity.UserRoleDO;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserDOMapper;
+import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserRoleDOMapper;
+import com.aoao.xiaoaoshu.user.model.dto.RegisterUserReqDTO;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +39,10 @@ public class UserServiceImpl implements UserService {
     private UserDOMapper userDOMapper;
     @Autowired
     private OssRpcService ossRpcService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private UserRoleDOMapper userRoleDOMapper;
 
 
     @Override
@@ -112,5 +122,30 @@ public class UserServiceImpl implements UserService {
         }
 
         return Result.success();
+    }
+
+    @Override
+    public Result<Long> register(RegisterUserReqDTO registerUserReqDTO) {
+        // 获取全局自增的小哈书 ID
+        Long xiaoaoshuId = stringRedisTemplate.opsForValue().increment(RedisKeyConstants.XIAOAOSHU_ID_GENERATOR_KEY);
+        UserDO userDO = new UserDO().builder()
+                .phone(registerUserReqDTO.getPhone())
+                .xiaoaoshuId(String.valueOf(xiaoaoshuId))
+                .nickname("小红薯" + xiaoaoshuId)
+                .password(new BCryptPasswordEncoder().encode("654321"))
+                .status(0)
+                .build();
+        // 插入用户表
+        userDOMapper.insert(userDO);
+        // 获取刚刚添加入库的用户 ID
+        Long userId = userDO.getId();
+        // 给该用户分配一个默认角色
+        UserRoleDO userRoleDO = UserRoleDO.builder()
+                .userId(userId)
+                .roleId(RoleConstants.COMMON_USER_ROLE_ID)
+                .build();
+        userRoleDOMapper.insert(userRoleDO);
+
+        return Result.success(userId);
     }
 }

@@ -5,6 +5,6 @@
 <mapper namespace="com.aoao.xiaoaoshu.user.biz.domain.mapper.UserDOMapper">
     <insert id="insert" parameterType="com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_user (phone, xiaohashu_id, nickname, password, status)
-        VALUES (#{user.phone}, #{user.xiaohashuId}, #{user.nickname}, #{user.password}, #{user.status})
+        VALUES (#{user.phone}, #{user.xiaoaoshuId}, #{user.nickname}, #{user.password}, #{user.status})
     </insert>
 </mapper>

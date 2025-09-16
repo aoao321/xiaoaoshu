@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.auth.constant;
+package com.aoao.xiaoaoshu.user.biz.constant;
 
 public class RoleConstants {
 

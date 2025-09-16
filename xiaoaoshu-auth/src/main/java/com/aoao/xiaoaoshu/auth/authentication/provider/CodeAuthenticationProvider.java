@@ -6,24 +6,21 @@ import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.xiaoaoshu.auth.authentication.token.CodeAuthenticationToken;
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.constant.RedisTimeConstants;
-import com.aoao.xiaoaoshu.auth.constant.RoleConstants;
 import com.aoao.xiaoaoshu.auth.domain.authoriztion.LoginUser;
 import com.aoao.xiaoaoshu.auth.domain.entity.UserDO;
-import com.aoao.xiaoaoshu.auth.domain.entity.UserRoleDO;
 import com.aoao.xiaoaoshu.auth.domain.mapper.RoleDOMapper;
 import com.aoao.xiaoaoshu.auth.domain.mapper.UserDOMapper;
 import com.aoao.xiaoaoshu.auth.domain.mapper.UserRoleDOMapper;
-import org.springframework.aop.framework.AopContext;
+import com.aoao.xiaoaoshu.auth.rpc.UserRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +38,8 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
     private UserDOMapper userDOMapper;
     @Autowired
     private UserRoleDOMapper userRoleDOMapper;
+    @Autowired
+    private UserRpcService userRpcService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -61,9 +60,12 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
 
             UserDO user = userDOMapper.getByPhone(phone);
             if (user == null) {
-                // 自动注册逻辑
-                CodeAuthenticationProvider proxy = (CodeAuthenticationProvider) AopContext.currentProxy();
-                user = proxy.register(phone);
+                // 调用user服务注册
+                Long userIdTmp = userRpcService.register(phone);
+                // 若调用用户服务，返回的用户 ID 为空，则提示登录失败
+                if (Objects.isNull(userIdTmp)) {
+                    throw new BizException(ResponseCodeEnum.LOGIN_FAIL);
+                }
             }
             List<String> roles = roleDOMapper.findRoleByPhone(phone);
             LoginUser loginUser = new LoginUser(user, roles);
@@ -81,30 +83,5 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
         return CodeAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    @Transactional
-    public UserDO register(String phone) {
 
-        // 获取全局自增的小哈书 ID
-        Long xiaoaoshuId = redisTemplate.opsForValue().increment(RedisKeyConstants.XIAOAOSHU_ID_GENERATOR_KEY);
-
-        UserDO userDO = new UserDO().builder()
-                .phone(phone)
-                .xiaohashuId(String.valueOf(xiaoaoshuId))
-                .nickname("小红薯" + xiaoaoshuId)
-                .password(new BCryptPasswordEncoder().encode("654321"))
-                .status(0)
-                .build();
-        // 插入用户表
-        userDOMapper.insert(userDO);
-        // 获取刚刚添加入库的用户 ID
-        Long userId = userDO.getId();
-        // 给该用户分配一个默认角色
-        UserRoleDO userRoleDO = UserRoleDO.builder()
-                .userId(userId)
-                .roleId(RoleConstants.COMMON_USER_ROLE_ID)
-                .build();
-        userRoleDOMapper.insert(userRoleDO);
-
-        return userDO;
-    }
 }
