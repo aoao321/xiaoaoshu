@@ -22,6 +22,7 @@
       <module>xiaoaoshu-oss</module>
     <module>xiaoaoshu-user</module>
     <module>xiaoaoshu-user/xiaoaoshu-user-biz</module>
+      <module>xiaoaoshu-kv</module>
   </modules>
 
   <properties>
