@@ -68,6 +68,11 @@
     <dependencies>
       <dependency>
         <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-kv-api</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-user-api</artifactId>
         <version>${revision}</version>
       </dependency>
