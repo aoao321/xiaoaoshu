@@ -16,10 +16,10 @@ public class AliSmsProperties {
     @Value("${ali.sms.endpoint}")
     private String endpoint;
 
-    @Value("${ali.sms.access-key-id}")
+    @Value("${ali.sms.access-key}")
     private String accessKeyId;
 
-    @Value("${ali.sms.access-key-secret}")
+    @Value("${ali.sms.secret-key}")
     private String accessKeySecret;
 
     @Value("${ali.sms.sign-name}")
