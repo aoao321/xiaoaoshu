@@ -23,6 +23,7 @@
     <module>xiaoaoshu-user</module>
     <module>xiaoaoshu-user/xiaoaoshu-user-biz</module>
       <module>xiaoaoshu-kv</module>
+      <module>xiaoaoshu-distributed-id-generator</module>
   </modules>
 
   <properties>
