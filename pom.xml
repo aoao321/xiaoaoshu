@@ -69,8 +69,13 @@
     <dependencies>
       <dependency>
         <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-distributed-id-generator-api</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-kv-api</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
       </dependency>
       <dependency>
         <groupId>com.aoao</groupId>

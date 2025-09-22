@@ -14,6 +14,7 @@ import com.aoao.xiaoaoshu.user.biz.domain.entity.UserRoleDO;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserDOMapper;
 import com.aoao.xiaoaoshu.user.biz.domain.mapper.UserRoleDOMapper;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
+import com.aoao.xiaoaoshu.user.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
 import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
@@ -48,6 +49,8 @@ public class UserServiceImpl implements UserService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private UserRoleDOMapper userRoleDOMapper;
+    @Autowired
+    private IdGeneratorRpcService idGeneratorRpcService;
 
 
     @Override
@@ -132,8 +135,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result<Long> register(RegisterUserReqDTO registerUserReqDTO) {
         // 获取全局自增的小哈书 ID
-        Long xiaoaoshuId = stringRedisTemplate.opsForValue().increment(RedisKeyConstants.XIAOAOSHU_ID_GENERATOR_KEY);
+        // Long xiaoaoshuId = stringRedisTemplate.opsForValue().increment(RedisKeyConstants.XIAOAOSHU_ID_GENERATOR_KEY);
+        String xiaoaoshuId = idGeneratorRpcService.generateXiaoaoshuId();
+        // RPC: 调用分布式 ID 生成服务生成用户 ID
+        String userIdStr = idGeneratorRpcService.generateUserId();
+        Long userId = Long.valueOf(userIdStr);
         UserDO userDO = new UserDO().builder()
+                .id(userId)
                 .phone(registerUserReqDTO.getPhone())
                 .xiaoaoshuId(String.valueOf(xiaoaoshuId))
                 .nickname("小红薯" + xiaoaoshuId)
@@ -142,8 +150,6 @@ public class UserServiceImpl implements UserService {
                 .build();
         // 插入用户表
         userDOMapper.insert(userDO);
-        // 获取刚刚添加入库的用户 ID
-        Long userId = userDO.getId();
         // 给该用户分配一个默认角色
         UserRoleDO userRoleDO = UserRoleDO.builder()
                 .userId(userId)
