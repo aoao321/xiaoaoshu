@@ -57,6 +57,7 @@ public class CodeAuthenticationProvider implements AuthenticationProvider {
             if (user == null) {
                 // 调用user服务注册
                 Long userIdTmp = userRpcService.register(phone);
+                user = userRpcService.findUserByPhone(phone);
                 // 若调用用户服务，返回的用户 ID 为空，则提示登录失败
                 if (Objects.isNull(userIdTmp)) {
                     throw new BizException(ResponseCodeEnum.LOGIN_FAIL);
