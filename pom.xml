@@ -24,6 +24,8 @@
     <module>xiaoaoshu-user/xiaoaoshu-user-biz</module>
       <module>xiaoaoshu-kv</module>
       <module>xiaoaoshu-distributed-id-generator</module>
+      <module>xiaoaoshu-note</module>
+    <module>xiaoaoshu-note/xiaoaoshu-note-api</module>
   </modules>
 
   <properties>
@@ -67,6 +69,11 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-note-api</artifactId>
+        <version>${revision}</version>
+      </dependency>
       <dependency>
         <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-distributed-id-generator-api</artifactId>
