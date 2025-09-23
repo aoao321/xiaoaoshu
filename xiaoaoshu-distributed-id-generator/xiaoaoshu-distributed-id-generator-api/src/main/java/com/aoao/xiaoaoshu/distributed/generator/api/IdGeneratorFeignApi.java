@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @create 2025-09-21-23:02
  */
 @FeignClient(name = ApiConstants.SERVICE_NAME)
-public interface IdGeneratorFeign {
+public interface IdGeneratorFeignApi {
     String PREFIX = "/id";
 
     @GetMapping(value = PREFIX + "/segment/get/{key}")

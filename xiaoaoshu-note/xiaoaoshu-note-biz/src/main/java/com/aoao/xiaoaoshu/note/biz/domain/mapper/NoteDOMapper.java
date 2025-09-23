@@ -1,6 +1,8 @@
 package com.aoao.xiaoaoshu.note.biz.domain.mapper;
 
+import com.aoao.xiaoaoshu.note.biz.domain.entity.NoteDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author aoao
@@ -8,4 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface NoteDOMapper {
+    void insert(@Param("note") NoteDO noteDO);
 }

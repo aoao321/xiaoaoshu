@@ -37,8 +37,12 @@ public enum ResponseCodeEnum {
     UPLOAD_BACKGROUND_IMG_FAIL("USER-20006", "背景图上传失败"),
     ABSENT_USER("USER-20000", "用户不存在"),
 
-    NOTE_CONTENT_NOT_FOUND("KV-20000", "该笔记内容不存在"),;
+    NOTE_CONTENT_NOT_FOUND("KV-20000", "该笔记内容不存在"),
 
+    NOTE_TYPE_ERROR("NOTE-20000", "未知的笔记类型"),
+    NOTE_PUBLISH_FAIL("NOTE-20001", "笔记发布失败"),
+
+;
 
 
 

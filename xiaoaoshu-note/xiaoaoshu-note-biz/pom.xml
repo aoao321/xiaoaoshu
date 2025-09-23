@@ -18,6 +18,14 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-distributed-id-generator-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-kv-api</artifactId>
+        </dependency>
         <!-- Redis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
