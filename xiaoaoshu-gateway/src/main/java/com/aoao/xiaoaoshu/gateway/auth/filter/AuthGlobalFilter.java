@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -47,7 +48,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private final List<String> WHITE_LIST = Arrays.asList(
             "/auth/login",          // 登录接口（核心，必须加）
-            "/auth/verification/code/send" // 发送验证码接口（如果有）
+            "/auth/verification/code/send",// 发送验证码接口
+            "/user/user/findNoteCreatorById"
     );
     // 路径匹配器（用于判断请求路径是否命中白名单）
     private final PathMatcher pathMatcher = new AntPathMatcher();
