@@ -28,6 +28,7 @@
         <module>xiaoaoshu-spring-boot-starter-jackson</module>
         <module>xiaoaoshu-spring-boot-starter-jwt</module>
         <module>xiaoaoshu-spring-boot-starter-biz-context</module>
+        <module>xiaoaoshu-spring-boot-starter-feign-context</module>
     </modules>
 
 </project>

@@ -22,6 +22,10 @@
     <dependencies>
         <dependency>
             <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-spring-boot-starter-feign-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aoao</groupId>
             <artifactId>xiaoaoshu-distributed-id-generator-api</artifactId>
         </dependency>
         <dependency>

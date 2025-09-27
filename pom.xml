@@ -71,6 +71,11 @@
     <dependencies>
       <dependency>
         <groupId>com.aoao</groupId>
+        <artifactId>xiaoaoshu-spring-boot-starter-feign-context</artifactId>
+        <version>${revision}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-note-api</artifactId>
         <version>${revision}</version>
       </dependency>

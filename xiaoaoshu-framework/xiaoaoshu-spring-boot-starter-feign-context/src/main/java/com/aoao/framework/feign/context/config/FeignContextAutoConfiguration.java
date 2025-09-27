@@ -1,6 +1,7 @@
-package com.aoao.framework.biz.context.config;
+package com.aoao.framework.feign.context.config;
 
-import com.aoao.framework.biz.context.interceptor.FeignRequestInterceptor;
+
+import com.aoao.framework.feign.context.interceptor.FeignRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
