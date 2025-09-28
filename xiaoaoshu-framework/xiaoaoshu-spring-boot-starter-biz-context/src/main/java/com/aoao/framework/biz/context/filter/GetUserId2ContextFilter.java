@@ -31,6 +31,35 @@ public class GetUserId2ContextFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        if (StringUtils.isBlank(request.getHeader(GlobalConstants.AUTHORIZATION))) {
+            // 判断是不是内部调用
+            String internalHeader = request.getHeader(GlobalConstants.INTERNAL_HEADER);
+            if (GlobalConstants.INTERNAL_TOKEN.equals(internalHeader)) {
+                log.debug("===== 检测到内部服务调用，跳过用户校验 =====");
+                // 可以给个“系统用户”的上下文（避免后续取 userId 时报 NPE）
+                LoginUser systemUser = new LoginUser(-1L,
+                        Collections.singletonList("ROLE_SYSTEM"),
+                        Collections.emptyList());
+
+                LoginUserContextHolder.set(systemUser);
+                SecurityContextHolder.getContext().setAuthentication(
+                        new UsernamePasswordAuthenticationToken(
+                                systemUser,
+                                null,
+                                systemUser.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+                        )
+                );
+
+                try {
+                    filterChain.doFilter(request, response);
+                } finally {
+                    LoginUserContextHolder.remove();
+                    SecurityContextHolder.clearContext();
+                }
+                return;
+            }
+        }
+
         // 从请求头里拿用户信息
         String userIdHeader = request.getHeader(GlobalConstants.USER_ID);
         String rolesHeader = request.getHeader(GlobalConstants.USER_ROLES);

@@ -26,6 +26,8 @@
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-biz-context/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-biz-operationlog/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-biz-operationlog/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-feign-context/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-feign-context/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-jackson/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-jackson/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/xiaoaoshu-framework/xiaoaoshu-spring-boot-starter-jwt/src/main/java" charset="UTF-8" />

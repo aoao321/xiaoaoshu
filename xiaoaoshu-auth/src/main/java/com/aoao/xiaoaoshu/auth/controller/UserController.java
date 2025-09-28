@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Autowired
-    private AuthService userService;
+    private AuthService authService;
 
     @PostMapping("/logout")
     @Log(value = "账号登出")
     public Result logout() {
-        return userService.logout();
+        return authService.logout();
     }
 
 }

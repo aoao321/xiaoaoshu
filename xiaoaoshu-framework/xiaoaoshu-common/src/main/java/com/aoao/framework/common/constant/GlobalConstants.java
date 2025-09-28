@@ -9,4 +9,7 @@ public class GlobalConstants {
     public static final String USER_ID = "X-User-Id";
     public static final String USER_ROLES = "X-User-Roles";
     public static final String USER_PERMISSIONS = "X-User-Permissions";
+
+    public static final String INTERNAL_HEADER = "X-Internal-Call";
+    public static final String INTERNAL_TOKEN = "xiaoaoshu-internal-secret-123456";
 }

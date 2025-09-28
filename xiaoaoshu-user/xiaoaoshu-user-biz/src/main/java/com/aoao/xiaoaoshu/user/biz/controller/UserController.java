@@ -4,9 +4,11 @@ import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindNoteCreatorByIdReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,23 +35,25 @@ public class UserController {
 
     @Log(value = "新用户注册")
     @PostMapping("/register")
-    public Result<Long> register(@RequestBody RegisterUserReqDTO registerUserReqDTO) {
+    public Result<Long> register(@RequestBody @Validated RegisterUserReqDTO registerUserReqDTO) {
         return userService.register(registerUserReqDTO);
     }
 
     @Log(value = "根据用户id查询用户信息")
     @PostMapping("/findById")
-    public Result<FindUserByIdRspDTO> findById(@RequestBody FindUserByIdReqDTO findUserByIdReqDTO) {
+    public Result<FindUserByIdRspDTO> findById(@RequestBody @Validated FindUserByIdReqDTO findUserByIdReqDTO) {
         return userService.findById(findUserByIdReqDTO);
     }
 
     @Log(value = "手机号查询用户信息")
     @PostMapping("/findByPhone")
-    public Result<FindUserByPhoneRspDTO> findByPhone(@RequestBody FindUserByPhoneReqDTO findUserByPhoneReqDTO) {
+    public Result<FindUserByPhoneRspDTO> findByPhone(@RequestBody @Validated FindUserByPhoneReqDTO findUserByPhoneReqDTO) {
         return userService.findByPhone(findUserByPhoneReqDTO);
     }
 
-
-
-
+    @Log(value = "查询发布笔记用户信息")
+    @PostMapping("/findNoteCreatorById")
+    public Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(@RequestBody @Validated FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO) {
+        return userService.findNoteCreatorById(findNoteCreatorByIdReqDTO);
+    }
 }

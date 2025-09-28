@@ -1,5 +1,6 @@
 package com.aoao.xiaoaoshu.user.biz.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
 import com.aoao.framework.common.constant.RedisKeyConstants;
@@ -7,6 +8,7 @@ import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.enums.SexEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
+import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.framework.common.util.ParamUtils;
 import com.aoao.xiaoaoshu.user.biz.constant.RoleConstants;
 import com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO;
@@ -17,15 +19,18 @@ import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
+import com.aoao.xiaoaoshu.user.model.dto.req.FindNoteCreatorByIdReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author aoao
@@ -51,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private UserRoleDOMapper userRoleDOMapper;
     @Autowired
     private IdGeneratorRpcService idGeneratorRpcService;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
 
     @Override
@@ -183,6 +191,44 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(userDO, findUserByIdRspDTO);
         return Result.success(findUserByIdRspDTO);
 
+    }
+
+    @Override
+    public Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO) {
+        Long id = findNoteCreatorByIdReqDTO.getId();
+        // 1.从redis中根据用户id查询用户基本信息
+        // 构建key
+        String key = RedisKeyConstants.buildUserInfoKey(id);
+        // 查询
+        String userInfoStr = stringRedisTemplate.opsForValue().get(key);
+        if (!StringUtils.isBlank(userInfoStr)) {// 查询到，直接返回
+            FindNoteCreatorByIdRspDTO rspDTO = JsonUtil.fromJson(userInfoStr, FindNoteCreatorByIdRspDTO.class);
+            return Result.success(rspDTO);
+        }
+        // 2.未查询到，查询数据库
+        // 从数据库中查询user
+        UserDO userDO = userDOMapper.getById(id);
+        // 如果为空，则直接返回null，并将null写入redis
+        if (Objects.isNull(userDO)) {
+            taskExecutor.execute(()->{
+                // 防止缓存穿透，将空数据存入 Redis 缓存 (过期时间不宜设置过长)
+                // 保底1分钟 + 随机秒数
+                long expireSeconds = 60 + RandomUtil.randomInt(60);
+                stringRedisTemplate.opsForValue().set(key, "null", expireSeconds, TimeUnit.SECONDS);
+            });
+            throw new BizException(ResponseCodeEnum.ABSENT_USER);
+        }
+        // 构造dto
+        FindNoteCreatorByIdRspDTO rspDTO = new FindNoteCreatorByIdRspDTO();
+        BeanUtils.copyProperties(userDO, rspDTO);
+        // 3.写入redis中
+        taskExecutor.submit(()->{
+            // 过期时间（保底1天 + 随机秒数，将缓存过期时间打散，防止同一时间大量缓存失效，导致数据库压力太大）
+            long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
+            stringRedisTemplate.opsForValue().set(key,JsonUtil.toJson(rspDTO),expireSeconds,TimeUnit.SECONDS);
+        });
+
+        return Result.success(rspDTO);
     }
 
 

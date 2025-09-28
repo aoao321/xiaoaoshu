@@ -20,6 +20,10 @@
     <dependencies>
         <dependency>
             <groupId>com.aoao</groupId>
+            <artifactId>xiaoaoshu-user-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aoao</groupId>
             <artifactId>xiaoaoshu-distributed-id-generator-api</artifactId>
         </dependency>
         <dependency>

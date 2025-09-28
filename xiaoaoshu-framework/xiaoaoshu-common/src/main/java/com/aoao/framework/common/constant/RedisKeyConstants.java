@@ -66,5 +66,20 @@ public class RedisKeyConstants {
     public static String buildRolePermissionsKey(String role) {
         return ROLE_PERMISSIONS_KEY_PREFIX + role;
     }
+
+    /**
+     * 用户信息数据 KEY 前缀
+     */
+    private static final String USER_INFO_KEY_PREFIX = "user:info:";
+
+
+    /**
+     * 构建角色对应的权限集合 KEY
+     * @param userId
+     * @return
+     */
+    public static String buildUserInfoKey(Long userId) {
+        return USER_INFO_KEY_PREFIX + userId;
+    }
 }
 

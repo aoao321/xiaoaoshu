@@ -2,14 +2,13 @@ package com.aoao.xiaoaoshu.user.api;
 
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.constant.ApiConstants;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserRoleByPhoneReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.*;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserRoleByPhoneRspDTO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,4 +33,7 @@ public interface UserFeignApi {
 
     @PostMapping(value = PREFIX + "/role/findRoleByPhone")
     Result<List<FindUserRoleByPhoneRspDTO>> findUserRoleByPhone(@RequestBody FindUserRoleByPhoneReqDTO findUserRoleByPhoneReqDTO);
+
+    @PostMapping(value = PREFIX + "/findNoteCreatorById")
+    Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(@RequestBody FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO);
 }

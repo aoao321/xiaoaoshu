@@ -17,7 +17,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(exposeProxy = true)
 @MapperScan("com.aoao.xiaoaoshu.auth.domain.mapper")
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.aoao.xiaoaoshu")
+@EnableFeignClients(basePackages = "com.aoao")
 public class XiaoaoshuAuthApplication {
     public static void main(String[] args) {
         SpringApplication.run(XiaoaoshuAuthApplication.class, args);
