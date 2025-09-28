@@ -26,6 +26,8 @@ import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +62,15 @@ public class UserServiceImpl implements UserService {
     private IdGeneratorRpcService idGeneratorRpcService;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * 用户信息本地缓存
+     */
+    private static final Cache<Long, FindNoteCreatorByIdRspDTO> LOCAL_CACHE = Caffeine.newBuilder()
+            .initialCapacity(10000) // 设置初始容量为 10000 个条目
+            .maximumSize(10000) // 设置缓存的最大容量为 10000 个条目
+            .expireAfterWrite(1, TimeUnit.HOURS) // 设置缓存条目在写入后 1 小时过期
+            .build();
 
 
     @Override
@@ -196,16 +208,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO) {
         Long id = findNoteCreatorByIdReqDTO.getId();
-        // 1.从redis中根据用户id查询用户基本信息
+        // 1.先查询本地缓存
+        FindNoteCreatorByIdRspDTO localCache = LOCAL_CACHE.getIfPresent(id);
+        if (Objects.nonNull(localCache)) {
+            // 返回
+            return Result.success(localCache);
+        }
+        // 2.从redis中根据用户id查询用户基本信息
         // 构建key
         String key = RedisKeyConstants.buildUserInfoKey(id);
         // 查询
         String userInfoStr = stringRedisTemplate.opsForValue().get(key);
         if (!StringUtils.isBlank(userInfoStr)) {// 查询到，直接返回
             FindNoteCreatorByIdRspDTO rspDTO = JsonUtil.fromJson(userInfoStr, FindNoteCreatorByIdRspDTO.class);
+            // 写入本地缓存
+            taskExecutor.execute(()->{
+                LOCAL_CACHE.put(id, rspDTO);
+            });
             return Result.success(rspDTO);
         }
-        // 2.未查询到，查询数据库
+        // 3.未查询到，查询数据库
         // 从数据库中查询user
         UserDO userDO = userDOMapper.getById(id);
         // 如果为空，则直接返回null，并将null写入redis
@@ -221,7 +243,7 @@ public class UserServiceImpl implements UserService {
         // 构造dto
         FindNoteCreatorByIdRspDTO rspDTO = new FindNoteCreatorByIdRspDTO();
         BeanUtils.copyProperties(userDO, rspDTO);
-        // 3.写入redis中
+        // 4.写入redis中
         taskExecutor.submit(()->{
             // 过期时间（保底1天 + 随机秒数，将缓存过期时间打散，防止同一时间大量缓存失效，导致数据库压力太大）
             long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);

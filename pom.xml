@@ -65,10 +65,17 @@
     <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
     <jakarta.version>6.0.0</jakarta.version>
     <feign-form.version>3.8.0</feign-form.version>
+    <caffeine.version>3.1.8</caffeine.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Caffeine 本地缓存 -->
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.aoao</groupId>
         <artifactId>xiaoaoshu-spring-boot-starter-feign-context</artifactId>

@@ -20,6 +20,11 @@
     </properties>
 
     <dependencies>
+        <!-- Caffeine 本地缓存 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.aoao</groupId>
             <artifactId>xiaoaoshu-spring-boot-starter-feign-context</artifactId>
