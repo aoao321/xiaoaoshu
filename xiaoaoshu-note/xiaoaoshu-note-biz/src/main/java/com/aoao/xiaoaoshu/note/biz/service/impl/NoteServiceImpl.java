@@ -1,11 +1,14 @@
 package com.aoao.xiaoaoshu.note.biz.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
+import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
+import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.xiaoaoshu.kv.model.dto.rsp.FindNoteContentRspDTO;
 import com.aoao.xiaoaoshu.note.biz.domain.entity.NoteDO;
 import com.aoao.xiaoaoshu.note.biz.domain.mapper.NoteDOMapper;
@@ -22,8 +25,14 @@ import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
 import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author aoao
@@ -49,11 +59,25 @@ public class NoteServiceImpl implements NoteService {
     private NoteDOMapper noteDOMapper;
     @Autowired
     private UserRpcService userRpcService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    @Qualifier("taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * 笔记详情本地缓存
+     */
+    private static final Cache<Long, FindNoteDetailRspVO> LOCAL_CACHE = Caffeine.newBuilder()
+            .initialCapacity(10000) // 设置初始容量为 10000 个条目
+            .maximumSize(10000) // 设置缓存的最大容量为 10000 个条目
+            .expireAfterWrite(1, TimeUnit.HOURS) // 设置缓存条目在写入后 1 小时过期
+            .build();
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result publish(PublishNoteReqVO reqVO) {
-        // 1.判断笔记类型
+        // 判断笔记类型
         Integer type = reqVO.getType();
         if (!NoteTypeEnum.isValid(type)) {
             throw new BizException(ResponseCodeEnum.NOTE_TYPE_ERROR);
@@ -142,9 +166,31 @@ public class NoteServiceImpl implements NoteService {
     public Result<FindNoteDetailRspVO> findDetail(FindNoteDetailReqVO reqVO) {
         // 获取noteId
         Long noteId = reqVO.getId();
+        // 一、从本地缓存获取
+        FindNoteDetailRspVO localCache = LOCAL_CACHE.getIfPresent(noteId);
+        if (Objects.nonNull(localCache)) {
+            return Result.success(localCache);
+        }
+        // 二、尝试从redis中获取笔记
+        String key = RedisKeyConstants.buildNoteDetailKey(noteId);
+        String noteDetailStr = stringRedisTemplate.opsForValue().get(key);
+        if (StringUtils.isNotBlank(noteDetailStr)) {
+            FindNoteDetailRspVO findNoteDetailRspVO = JsonUtil.fromJson(noteDetailStr, FindNoteDetailRspVO.class);
+            // 同时写入本地缓存
+            taskExecutor.execute(() -> {
+                LOCAL_CACHE.put(noteId, findNoteDetailRspVO);
+            });
+            return Result.success(findNoteDetailRspVO);
+        }
+        // 三、未命中，查询数据库
         // 1.查询笔记
         NoteDO noteDO = noteDOMapper.selectByPrimaryKey(noteId);
-        if (Objects.isNull(noteDO)) { // 不存在抛出异常
+        if (Objects.isNull(noteDO)) { // 不存在抛出异常、写入redis
+            taskExecutor.execute(() -> {
+                // 1分钟+随机秒数
+                long expiredTime = 60 + RandomUtil.randomInt(60);
+                stringRedisTemplate.opsForValue().set(key, "null" , expiredTime, TimeUnit.SECONDS);
+            });
             throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
         }
         // 2.判断可见性
@@ -179,7 +225,7 @@ public class NoteServiceImpl implements NoteService {
                 && StringUtils.isNotBlank(imgUrisStr)) {
             imgUris = List.of(imgUrisStr.split(","));
         }
-        FindNoteDetailRspVO vo = FindNoteDetailRspVO.builder()
+        FindNoteDetailRspVO findNoteDetailRspVO = FindNoteDetailRspVO.builder()
                 .avatar(noteCreator.getAvatar())
                 .creatorId(creatorId)
                 .creatorName(noteCreator.getNickname())
@@ -194,6 +240,14 @@ public class NoteServiceImpl implements NoteService {
                 .title(noteDO.getTitle())
                 .id(noteDO.getId())
                 .build();
-        return Result.success(vo);
+        // 四、写入redis
+        // 异步线程中将笔记详情存入 Redis
+        taskExecutor.submit(() -> {
+            String noteDetailJson1 = JsonUtil.toJson(findNoteDetailRspVO);
+            // 过期时间（保底1天 + 随机秒数，将缓存过期时间打散，防止同一时间大量缓存失效，导致数据库压力太大）
+            long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
+            stringRedisTemplate.opsForValue().set(key, noteDetailJson1, expireSeconds, TimeUnit.SECONDS);
+        });
+        return Result.success(findNoteDetailRspVO);
     }
 }
