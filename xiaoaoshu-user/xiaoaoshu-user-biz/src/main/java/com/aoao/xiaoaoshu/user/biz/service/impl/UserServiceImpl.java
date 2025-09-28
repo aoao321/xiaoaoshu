@@ -31,6 +31,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -60,6 +61,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private IdGeneratorRpcService idGeneratorRpcService;
     @Autowired
+    @Qualifier("taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     /**
