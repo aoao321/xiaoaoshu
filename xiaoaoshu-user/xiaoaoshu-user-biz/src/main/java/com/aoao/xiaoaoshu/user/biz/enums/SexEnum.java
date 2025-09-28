@@ -1,4 +1,4 @@
-package com.aoao.framework.common.enums;
+package com.aoao.xiaoaoshu.user.biz.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
