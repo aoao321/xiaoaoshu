@@ -35,7 +35,7 @@ public class NoteContentServiceImpl implements NoteContentService {
 
         // 构建数据库 DO 实体类
         NoteContentDO nodeContent = NoteContentDO.builder()
-                .id(UUID.fromString(uuid)) // TODO: 暂时用 UUID, 目的是为了下一章讲解压测，不用动态传笔记 ID。后续改为笔记服务传过来的笔记 ID
+                .id(UUID.fromString(uuid))
                 .content(content)
                 .build();
 

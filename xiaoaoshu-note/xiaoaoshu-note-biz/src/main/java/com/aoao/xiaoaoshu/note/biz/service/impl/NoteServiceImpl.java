@@ -6,6 +6,7 @@ import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
+import com.aoao.xiaoaoshu.kv.model.dto.rsp.FindNoteContentRspDTO;
 import com.aoao.xiaoaoshu.note.biz.domain.entity.NoteDO;
 import com.aoao.xiaoaoshu.note.biz.domain.mapper.NoteDOMapper;
 import com.aoao.xiaoaoshu.note.biz.domain.mapper.TopicDOMapper;
@@ -15,7 +16,12 @@ import com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.note.biz.rpc.KVRpcService;
+import com.aoao.xiaoaoshu.note.biz.rpc.UserRpcService;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
+import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
+import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +47,8 @@ public class NoteServiceImpl implements NoteService {
     private KVRpcService kvRpcService;
     @Autowired
     private NoteDOMapper noteDOMapper;
+    @Autowired
+    private UserRpcService userRpcService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -128,5 +136,64 @@ public class NoteServiceImpl implements NoteService {
         }
 
         return Result.success();
+    }
+
+    @Override
+    public Result<FindNoteDetailRspVO> findDetail(FindNoteDetailReqVO reqVO) {
+        // 获取noteId
+        Long noteId = reqVO.getId();
+        // 1.查询笔记
+        NoteDO noteDO = noteDOMapper.selectByPrimaryKey(noteId);
+        if (Objects.isNull(noteDO)) { // 不存在抛出异常
+            throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
+        }
+        // 2.判断可见性
+        Integer visible = noteDO.getVisible();
+        Long currentId = LoginUserContextHolder.getCurrentId();
+        Long creatorId = noteDO.getCreatorId();
+        if (NoteVisibleEnum.PRIVATE.getCode().equals(visible) && !currentId.equals(creatorId)) { // 判断当前用户是否为作者
+            // 私有并且不是作者本人，不可见
+            throw new BizException(ResponseCodeEnum.NOTE_PRIVATE);
+        }
+        // 3.查询作者的个人信息
+        FindNoteCreatorByIdRspDTO noteCreator = userRpcService.findNoteCreatorById(creatorId);
+        if (Objects.isNull(noteCreator)) {
+            noteCreator = FindNoteCreatorByIdRspDTO.builder()
+                    .avatar("默认头像")
+                    .id(-1l)
+                    .nickname("未知用户")
+                    .build();
+        }
+        // 4.判断笔记内容是否为空
+        String content = null;
+        if (noteDO.getIsContentEmpty().equals(Boolean.FALSE)) { // 调用kv模块查询笔记内容
+            FindNoteContentRspDTO noteContent = kvRpcService.findNoteContent(noteDO.getContentUuid());
+            content = noteContent.getContent();
+        }
+        // 5.图片或者视频
+        List<String> imgUris = null;
+        Integer noteType = noteDO.getType();
+        // 如果查询的是图文笔记，需要将图片链接的逗号分隔开，转换成集合
+        String imgUrisStr = noteDO.getImgUris();
+        if (Objects.equals(noteType, NoteTypeEnum.IMAGE_TEXT.getCode())
+                && StringUtils.isNotBlank(imgUrisStr)) {
+            imgUris = List.of(imgUrisStr.split(","));
+        }
+        FindNoteDetailRspVO vo = FindNoteDetailRspVO.builder()
+                .avatar(noteCreator.getAvatar())
+                .creatorId(creatorId)
+                .creatorName(noteCreator.getNickname())
+                .content(content)
+                .imgUris(imgUris)
+                .videoUri(noteDO.getVideoUri())
+                .type(noteType)
+                .topicId(noteDO.getTopicId())
+                .topicName(noteDO.getTopicName())
+                .updateTime(noteDO.getUpdateTime())
+                .visible(visible)
+                .title(noteDO.getTitle())
+                .id(noteDO.getId())
+                .build();
+        return Result.success(vo);
     }
 }

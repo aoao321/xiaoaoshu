@@ -15,4 +15,10 @@
                      #{note.updateTime}, #{note.status}, #{note.contentUuid}
                  )
     </insert>
+    <select id="selectByPrimaryKey" resultType="com.aoao.xiaoaoshu.note.biz.domain.entity.NoteDO">
+        select
+        *
+        from t_note
+        where id = #{id,jdbcType=BIGINT} and status = 1
+    </select>
 </mapper>

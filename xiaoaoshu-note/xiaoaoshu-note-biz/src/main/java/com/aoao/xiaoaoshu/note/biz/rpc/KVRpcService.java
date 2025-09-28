@@ -4,6 +4,8 @@ import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.kv.api.KVFeignApi;
 import com.aoao.xiaoaoshu.kv.model.dto.req.AddNoteContentReqDTO;
 import com.aoao.xiaoaoshu.kv.model.dto.req.DeleteNoteContentReqDTO;
+import com.aoao.xiaoaoshu.kv.model.dto.req.FindNoteContentReqDTO;
+import com.aoao.xiaoaoshu.kv.model.dto.rsp.FindNoteContentRspDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +59,15 @@ public class KVRpcService {
         }
 
         return true;
+    }
+
+    public FindNoteContentRspDTO findNoteContent(String uuid) {
+        FindNoteContentReqDTO findNoteContentReqDTO = new FindNoteContentReqDTO(uuid);
+        Result<FindNoteContentRspDTO> response = kvFeignApi.findNoteContent(findNoteContentReqDTO);
+        if (Objects.isNull(response) || !response.isSuccess()) {
+            return null;
+        }
+        return response.getData();
     }
 
 }

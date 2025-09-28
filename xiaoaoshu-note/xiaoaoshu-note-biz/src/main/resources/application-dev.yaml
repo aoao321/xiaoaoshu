@@ -1,3 +1,6 @@
+security:
+  whitelist: "/note/detail"
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类

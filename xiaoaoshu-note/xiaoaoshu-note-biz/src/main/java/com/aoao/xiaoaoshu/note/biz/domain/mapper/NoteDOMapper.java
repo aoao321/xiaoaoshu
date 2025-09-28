@@ -11,4 +11,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface NoteDOMapper {
     void insert(@Param("note") NoteDO noteDO);
+
+    NoteDO selectByPrimaryKey(Long noteId);
 }

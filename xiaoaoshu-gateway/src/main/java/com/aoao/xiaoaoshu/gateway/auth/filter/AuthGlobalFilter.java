@@ -49,7 +49,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private final List<String> WHITE_LIST = Arrays.asList(
             "/auth/login",          // 登录接口（核心，必须加）
             "/auth/verification/code/send",// 发送验证码接口
-            "/user/user/findNoteCreatorById"
+            "/note/note/detail"
     );
     // 路径匹配器（用于判断请求路径是否命中白名单）
     private final PathMatcher pathMatcher = new AntPathMatcher();

@@ -2,6 +2,8 @@ package com.aoao.xiaoaoshu.note.biz.service;
 
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
+import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
+import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
 
 /**
  * @author aoao
@@ -9,4 +11,6 @@ import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
  */
 public interface NoteService {
     Result publish(PublishNoteReqVO reqVO);
+
+    Result<FindNoteDetailRspVO> findDetail(FindNoteDetailReqVO reqVO);
 }

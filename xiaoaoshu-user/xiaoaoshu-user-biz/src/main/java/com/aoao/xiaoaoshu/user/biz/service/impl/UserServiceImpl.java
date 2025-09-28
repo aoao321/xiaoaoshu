@@ -5,7 +5,7 @@ import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
-import com.aoao.framework.common.enums.SexEnum;
+import com.aoao.xiaoaoshu.user.biz.enums.SexEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.JsonUtil;
@@ -39,7 +39,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
