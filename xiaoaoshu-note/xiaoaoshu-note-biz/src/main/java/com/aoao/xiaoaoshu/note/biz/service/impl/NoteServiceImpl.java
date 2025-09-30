@@ -37,9 +37,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -201,21 +203,32 @@ public class NoteServiceImpl implements NoteService {
             // 私有并且不是作者本人，不可见
             throw new BizException(ResponseCodeEnum.NOTE_PRIVATE);
         }
-        // 3.查询作者的个人信息
-        FindNoteCreatorByIdRspDTO noteCreator = userRpcService.findNoteCreatorById(creatorId);
+        // 3.调用rpc查询作者的个人信息（异步）
+        CompletableFuture<FindNoteCreatorByIdRspDTO> creatorFuture =
+                CompletableFuture.supplyAsync(() -> userRpcService.findNoteCreatorById(creatorId), taskExecutor);
+
+        // 4.调用rpc查询文本内容（异步）
+        CompletableFuture<String> contentFuture = CompletableFuture.supplyAsync(() -> {
+            if (noteDO.getIsContentEmpty().equals(Boolean.FALSE)) {
+                FindNoteContentRspDTO noteContent = kvRpcService.findNoteContent(noteDO.getContentUuid());
+                return noteContent.getContent();
+            }
+            return null;
+        }, taskExecutor);
+
+        // 等待两个调用结束
+        CompletableFuture.allOf(creatorFuture, contentFuture).join();
+        // 处理异步调用
+        FindNoteCreatorByIdRspDTO noteCreator = creatorFuture.join();
+        String content = contentFuture.join();
         if (Objects.isNull(noteCreator)) {
             noteCreator = FindNoteCreatorByIdRspDTO.builder()
                     .avatar("默认头像")
-                    .id(-1l)
+                    .id(-1L)
                     .nickname("未知用户")
                     .build();
         }
-        // 4.判断笔记内容是否为空
-        String content = null;
-        if (noteDO.getIsContentEmpty().equals(Boolean.FALSE)) { // 调用kv模块查询笔记内容
-            FindNoteContentRspDTO noteContent = kvRpcService.findNoteContent(noteDO.getContentUuid());
-            content = noteContent.getContent();
-        }
+
         // 5.图片或者视频
         List<String> imgUris = null;
         Integer noteType = noteDO.getType();
