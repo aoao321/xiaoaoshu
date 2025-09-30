@@ -3,6 +3,7 @@ package com.aoao.xiaoaoshu.note.biz.controller;
 import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
+import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
 import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
 import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
@@ -37,5 +38,10 @@ public class NoteController {
         return noteService.findDetail(reqVO);
     }
 
+    @Log("笔记更新")
+    @PostMapping("/update")
+    public Result updateNote(@Validated @RequestBody UpdateNoteReqVO reqVO) {
+        return noteService.update(reqVO);
+    }
 
 }

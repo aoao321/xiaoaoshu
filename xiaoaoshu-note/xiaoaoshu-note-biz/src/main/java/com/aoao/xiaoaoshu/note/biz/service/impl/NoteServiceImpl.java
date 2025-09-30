@@ -17,6 +17,7 @@ import com.aoao.xiaoaoshu.note.biz.enums.NoteStatusEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteTypeEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
+import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.note.biz.rpc.KVRpcService;
 import com.aoao.xiaoaoshu.note.biz.rpc.UserRpcService;
@@ -262,5 +263,83 @@ public class NoteServiceImpl implements NoteService {
             stringRedisTemplate.opsForValue().set(key, noteDetailJson1, expireSeconds, TimeUnit.SECONDS);
         });
         return Result.success(findNoteDetailRspVO);
+    }
+
+    @Override
+    public Result update(UpdateNoteReqVO reqVO) {
+        // 1.查询该笔记
+        Long id = reqVO.getId();
+        NoteDO noteDO = noteDOMapper.selectByPrimaryKey(id);
+        if (Objects.isNull(noteDO)) {
+            throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
+        }
+        // 笔记类型
+        Integer type = reqVO.getType();
+        // 2.获取对应类型的枚举
+        NoteTypeEnum noteTypeEnum = NoteTypeEnum.valueOf(type);
+        // 若非图文、视频，抛出业务业务异常
+        if (Objects.isNull(noteTypeEnum)) {
+            throw new BizException(ResponseCodeEnum.NOTE_TYPE_ERROR);
+        }
+        String imgUrlsStr = null;
+        String videoUri = null;
+        switch (noteTypeEnum) {
+            case IMAGE_TEXT: // 存放照片
+                List<String> imgUris = reqVO.getImgUris();
+                Preconditions.checkArgument(CollUtil.isNotEmpty(imgUris),"笔记图片不能为空");
+                Preconditions.checkArgument(imgUris.size()<=8,"图片不能超过8张");
+                // 转换成字符串
+                imgUrlsStr = StringUtils.join(imgUris, ",");
+                break;
+            case VIDEO:
+                videoUri = reqVO.getVideoUri();
+                Preconditions.checkArgument(StringUtils.isNotEmpty(videoUri),"笔记视频不能为空");
+                break;
+        }
+        // 3.判断topic是否存在
+        Long topicId = reqVO.getTopicId();
+        String topicName = topicDOMapper.selectNameByPrimaryKey(topicId);
+        if (StringUtils.isBlank(topicName)) {
+            throw new BizException(ResponseCodeEnum.TOPIC_NOT_FOUND);
+        }
+        // 4.判断content是否为空
+        String content = reqVO.getContent();
+        String contentUuid = noteDO.getContentUuid();
+        Boolean isContentEmpty = noteDO.getIsContentEmpty();
+        // 笔记内容是否更新成功
+        boolean isUpdateContentSuccess = false;
+        if (StringUtils.isBlank(content)) {
+            // 若笔记内容为空，则删除 K-V 存储
+            isUpdateContentSuccess = kvRpcService.deleteNoteContent(contentUuid);
+            isContentEmpty = Boolean.TRUE;
+        } else {
+            // 若将无内容的笔记，更新为了有内容的笔记，需要重新生成 UUID
+            contentUuid = StringUtils.isBlank(contentUuid) ? UUID.randomUUID().toString() : contentUuid;
+            // 调用 K-V 更新短文本
+            isUpdateContentSuccess = kvRpcService.saveNoteContent(contentUuid, content);
+            isContentEmpty = Boolean.FALSE;
+        }
+        if (!isUpdateContentSuccess) {
+            throw new BizException(ResponseCodeEnum.NOTE_UPDATE_FAIL);
+        }
+
+        noteDO.setImgUris(imgUrlsStr);
+        noteDO.setVideoUri(videoUri);
+        noteDO.setTopicId(topicId);
+        noteDO.setTopicName(topicName);
+        noteDO.setUpdateTime(LocalDateTime.now());
+        noteDO.setIsContentEmpty(isContentEmpty);
+        noteDO.setTitle(reqVO.getTitle());
+        noteDO.setType(type);
+
+        // 5.更新数据库
+        noteDOMapper.updateByPrimaryKey(noteDO);
+        // 6.删除 Redis 缓存
+        String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(id);
+        stringRedisTemplate.delete(noteDetailRedisKey);
+        // 7.删除本地缓存
+        LOCAL_CACHE.invalidate(id);
+
+        return Result.success();
     }
 }

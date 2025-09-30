@@ -28,9 +28,6 @@ public enum ResponseCodeEnum {
     TYPE_ERROR("AUTH-40015", "登录方式错误"),
 
 
-
-
-
     NICK_NAME_VALID_FAIL("USER-20001", "昵称请设置2-24个字符，不能使用@《/等特殊字符"),
     XIAOAOSHU_ID_VALID_FAIL("USER-20002", "小哈书号请设置6-15个字符，仅可使用英文（必须）、数字、下划线"),
     SEX_VALID_FAIL("USER-20003", "性别错误"),
@@ -45,6 +42,9 @@ public enum ResponseCodeEnum {
     NOTE_PUBLISH_FAIL("NOTE-20001", "笔记发布失败"),
     NOTE_NOT_FOUND("NOTE-20002", "笔记不存在"),
     NOTE_PRIVATE("NOTE-20003", "作者已将该笔记设置为仅自己可见"),
+    NOTE_UPDATE_FAIL("NOTE-20004", "笔记更新失败"),
+
+    TOPIC_NOT_FOUND("TOPIC-20000","未知的话题类型")
     ;
 
 

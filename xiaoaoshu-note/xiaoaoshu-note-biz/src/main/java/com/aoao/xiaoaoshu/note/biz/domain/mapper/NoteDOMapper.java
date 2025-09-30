@@ -13,4 +13,6 @@ public interface NoteDOMapper {
     void insert(@Param("note") NoteDO noteDO);
 
     NoteDO selectByPrimaryKey(Long noteId);
+
+    void updateByPrimaryKey(NoteDO noteDO);
 }
