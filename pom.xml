@@ -66,6 +66,7 @@
     <jakarta.version>6.0.0</jakarta.version>
     <feign-form.version>3.8.0</feign-form.version>
     <caffeine.version>3.1.8</caffeine.version>
+    <rabbitmq.version>3.11</rabbitmq.version>
   </properties>
 
   <dependencyManagement>

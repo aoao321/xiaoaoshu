@@ -16,4 +16,6 @@ public interface NoteService {
     Result<FindNoteDetailRspVO> findDetail(FindNoteDetailReqVO reqVO);
 
     Result update(UpdateNoteReqVO reqVO);
+
+    void deleteNoteLocalCache(Long id);
 }

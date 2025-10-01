@@ -2,6 +2,23 @@ security:
   whitelist: "/note/detail"
 
 spring:
+  rabbitmq:
+    host: localhost      # RabbitMQ 服务器地址
+    port: 5672           # 默认端口
+    username: admin      # 你启动容器时设置的账号
+    password: admin      # 你启动容器时设置的密码
+    virtual-host: /      # 默认虚拟主机
+    listener:
+      simple:
+        # 每个消费者最多同时拉取的消息数量（限流）
+        prefetch: 10
+        # 消费者最大并发数
+        concurrency: 5
+        max-concurrency: 10
+        # 消费者自动启动
+        auto-startup: true
+        # 消费确认模式
+        acknowledge-mode: manual
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类
     # 数据库连接信息

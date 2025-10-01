@@ -10,6 +10,7 @@ import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.JsonUtil;
 import com.aoao.xiaoaoshu.kv.model.dto.rsp.FindNoteContentRspDTO;
+import com.aoao.xiaoaoshu.note.biz.config.RabbitConfig;
 import com.aoao.xiaoaoshu.note.biz.domain.entity.NoteDO;
 import com.aoao.xiaoaoshu.note.biz.domain.mapper.NoteDOMapper;
 import com.aoao.xiaoaoshu.note.biz.domain.mapper.TopicDOMapper;
@@ -29,6 +30,7 @@ import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
@@ -67,6 +69,8 @@ public class NoteServiceImpl implements NoteService {
     @Autowired
     @Qualifier("taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 笔记详情本地缓存
@@ -338,8 +342,18 @@ public class NoteServiceImpl implements NoteService {
         String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(id);
         stringRedisTemplate.delete(noteDetailRedisKey);
         // 7.删除本地缓存
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.DELETE_NOTE_LOCAL_CACHE_EXCHANGE, // 交换机
+                "",                                           // Fanout 模式不用 routing key
+                id                                            // 发送笔记ID，消费者根据ID删除本地缓存
+        );
         LOCAL_CACHE.invalidate(id);
 
         return Result.success();
+    }
+
+    @Override
+    public void deleteNoteLocalCache(Long id) {
+        LOCAL_CACHE.invalidate(id);
     }
 }
