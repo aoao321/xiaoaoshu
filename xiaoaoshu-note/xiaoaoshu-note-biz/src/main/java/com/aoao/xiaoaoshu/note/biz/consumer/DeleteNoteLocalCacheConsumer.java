@@ -2,8 +2,6 @@ package com.aoao.xiaoaoshu.note.biz.consumer;
 
 import com.aoao.xiaoaoshu.note.biz.config.RabbitConfig;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
-import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
-import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

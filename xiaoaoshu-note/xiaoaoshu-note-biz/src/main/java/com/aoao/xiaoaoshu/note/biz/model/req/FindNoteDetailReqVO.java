@@ -1,4 +1,4 @@
-package com.aoao.xiaoaoshu.note.biz.vo.req;
+package com.aoao.xiaoaoshu.note.biz.model.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

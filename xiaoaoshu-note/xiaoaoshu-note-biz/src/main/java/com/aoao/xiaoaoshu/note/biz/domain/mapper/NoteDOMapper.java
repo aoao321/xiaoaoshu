@@ -17,4 +17,6 @@ public interface NoteDOMapper {
     void updateByPrimaryKey(NoteDO noteDO);
 
     void deleteLogically(NoteDO noteDO);
+
+    void updateIsTop(NoteDO noteDO);
 }

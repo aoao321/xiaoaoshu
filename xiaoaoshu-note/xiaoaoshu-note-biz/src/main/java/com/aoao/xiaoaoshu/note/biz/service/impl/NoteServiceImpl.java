@@ -17,38 +17,33 @@ import com.aoao.xiaoaoshu.note.biz.domain.mapper.TopicDOMapper;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteStatusEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteTypeEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum;
-import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
+import com.aoao.xiaoaoshu.note.biz.model.req.*;
 import com.aoao.xiaoaoshu.note.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.note.biz.rpc.KVRpcService;
 import com.aoao.xiaoaoshu.note.biz.rpc.UserRpcService;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
-import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
-import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
+import com.aoao.xiaoaoshu.note.biz.model.rsp.FindNoteDetailRspVO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
-import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.aoao.xiaoaoshu.note.biz.config.RabbitConfig.DELAY_DELETE_NOTE_REDIS_CACHE_EXCHANGE;
+import static com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum.PRIVATE;
+import static com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum.PUBLIC;
 
 /**
  * @author aoao
@@ -151,7 +146,7 @@ public class NoteServiceImpl implements NoteService {
                 .topicId(reqVO.getTopicId())
                 .topicName(topicName)
                 .type(type)
-                .visible(NoteVisibleEnum.PUBLIC.getCode())
+                .visible(PUBLIC.getCode())
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .status(NoteStatusEnum.NORMAL.getCode())
@@ -382,6 +377,32 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
+    public Result updateVisible(UpdateNoteVisibleOnlyMeReqVO reqVO) {
+        // 1.查询该笔记
+        Long id = reqVO.getId();
+        NoteDO noteDO = noteDOMapper.selectByPrimaryKey(id);
+        if (Objects.isNull(noteDO)) {
+            throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
+        }
+        // 2.修改可见，更新数据库
+        Integer visible = reqVO.getVisible();
+        if (!NoteVisibleEnum.isValid(visible)) {
+            throw new BizException(ResponseCodeEnum.NOTE_UPDATE_VISIBLE_TYPE_ERROR);
+        }
+        noteDO.setVisible(visible);
+        noteDOMapper.updateByPrimaryKey(noteDO);
+        // 3.删除redis中缓存
+        String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(id);
+        stringRedisTemplate.delete(noteDetailRedisKey);
+        // 4.删除本地缓存
+        rabbitTemplate.convertAndSend(RabbitConfig.DELETE_NOTE_LOCAL_CACHE_EXCHANGE,"",id);
+        LOCAL_CACHE.invalidate(id);
+
+        return Result.success();
+
+    }
+
+    @Override
     public void deleteNoteLocalCache(Long id) {
         LOCAL_CACHE.invalidate(id);
     }
@@ -389,5 +410,34 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public void delayDeleteNoteRedisCache(String key) {
         stringRedisTemplate.delete(key);
+    }
+
+    @Override
+    public Result top(TopNoteReqVO topNoteReqVO) {
+        // 笔记 ID
+        Long noteId = topNoteReqVO.getId();
+        // 是否置顶
+        Boolean isTop = topNoteReqVO.getIsTop();
+
+        // 当前登录用户 ID
+        Long currUserId = LoginUserContextHolder.getCurrentId();
+
+        // 构建置顶/取消置顶 DO 实体类
+        NoteDO noteDO = NoteDO.builder()
+                .id(noteId)
+                .isTop(isTop)
+                .updateTime(LocalDateTime.now())
+                .creatorId(currUserId) // 只有笔记所有者，才能置顶/取消置顶笔记
+                .build();
+        noteDOMapper.updateIsTop(noteDO);
+
+        // 删除 Redis 缓存
+        String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(noteId);
+        stringRedisTemplate.delete(noteDetailRedisKey);
+
+        // 同步发送广播模式 MQ，将所有实例中的本地缓存都删除掉
+        rabbitTemplate.convertAndSend(RabbitConfig.DELETE_NOTE_LOCAL_CACHE_EXCHANGE, "",noteId);
+
+        return Result.success();
     }
 }

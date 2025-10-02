@@ -43,6 +43,8 @@ public enum ResponseCodeEnum {
     NOTE_NOT_FOUND("NOTE-20002", "笔记不存在"),
     NOTE_PRIVATE("NOTE-20003", "作者已将该笔记设置为仅自己可见"),
     NOTE_UPDATE_FAIL("NOTE-20004", "笔记更新失败"),
+    NOTE_UPDATE_VISIBLE_TYPE_ERROR("NOTE-20005", "未知笔记可见范围"),
+    NOTE_CANT_OPERATE("NOTE-20006", "您无法操作该笔记"),
 
     TOPIC_NOT_FOUND("TOPIC-20000","未知的话题类型")
     ;

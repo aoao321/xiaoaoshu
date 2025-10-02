@@ -2,12 +2,9 @@ package com.aoao.xiaoaoshu.note.biz.controller;
 
 import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
+import com.aoao.xiaoaoshu.note.biz.model.req.*;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
-import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
-import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
+import com.aoao.xiaoaoshu.note.biz.model.rsp.FindNoteDetailRspVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +48,16 @@ public class NoteController {
         return noteService.delete(reqVO);
     }
 
+    @Log("仅自己可见")
+    @PostMapping("/visible/onlyme")
+    public Result updateVisible(@Validated @RequestBody UpdateNoteVisibleOnlyMeReqVO reqVO) {
+        return noteService.updateVisible(reqVO);
+    }
 
+    @Log("置顶/取消置顶笔记")
+    @PostMapping(value = "/top")
+    public Result topNote(@Validated @RequestBody TopNoteReqVO topNoteReqVO) {
+        return noteService.top(topNoteReqVO);
+    }
 
 }

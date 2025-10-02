@@ -1,11 +1,8 @@
 package com.aoao.xiaoaoshu.note.biz.service;
 
 import com.aoao.framework.common.result.Result;
-import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
-import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
-import com.aoao.xiaoaoshu.note.biz.vo.rsp.FindNoteDetailRspVO;
+import com.aoao.xiaoaoshu.note.biz.model.req.*;
+import com.aoao.xiaoaoshu.note.biz.model.rsp.FindNoteDetailRspVO;
 
 /**
  * @author aoao
@@ -20,7 +17,11 @@ public interface NoteService {
 
     Result delete(DeleteNoteReqVO reqVO);
 
+    Result updateVisible(UpdateNoteVisibleOnlyMeReqVO reqVO);
+
     void deleteNoteLocalCache(Long id);
 
     void delayDeleteNoteRedisCache(String key);
+
+    Result top(TopNoteReqVO topNoteReqVO);
 }
