@@ -18,4 +18,6 @@ public interface NoteService {
     Result update(UpdateNoteReqVO reqVO);
 
     void deleteNoteLocalCache(Long id);
+
+    void delayDeleteNoteRedisCache(String key);
 }

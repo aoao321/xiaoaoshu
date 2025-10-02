@@ -47,6 +47,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.aoao.xiaoaoshu.note.biz.config.RabbitConfig.DELAY_DELETE_NOTE_REDIS_CACHE_EXCHANGE;
+
 /**
  * @author aoao
  * @create 2025-09-23-0:26
@@ -348,12 +350,21 @@ public class NoteServiceImpl implements NoteService {
                 id                                            // 发送笔记ID，消费者根据ID删除本地缓存
         );
         LOCAL_CACHE.invalidate(id);
-
+        // 8.双删
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.DELAY_DELETE_NOTE_REDIS_CACHE_EXCHANGE,
+                RabbitConfig.DELAY_DELETE_NOTE_REDIS_ROUTING_KEY,
+                noteDetailRedisKey);
         return Result.success();
     }
 
     @Override
     public void deleteNoteLocalCache(Long id) {
         LOCAL_CACHE.invalidate(id);
+    }
+
+    @Override
+    public void delayDeleteNoteRedisCache(String key) {
+        stringRedisTemplate.delete(key);
     }
 }
