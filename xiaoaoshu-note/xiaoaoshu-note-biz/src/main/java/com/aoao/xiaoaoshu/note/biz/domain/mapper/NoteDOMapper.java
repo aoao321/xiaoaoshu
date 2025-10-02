@@ -15,4 +15,6 @@ public interface NoteDOMapper {
     NoteDO selectByPrimaryKey(Long noteId);
 
     void updateByPrimaryKey(NoteDO noteDO);
+
+    void deleteLogically(NoteDO noteDO);
 }

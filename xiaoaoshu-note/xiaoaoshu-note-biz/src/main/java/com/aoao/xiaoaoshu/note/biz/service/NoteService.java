@@ -1,6 +1,7 @@
 package com.aoao.xiaoaoshu.note.biz.service;
 
 import com.aoao.framework.common.result.Result;
+import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.vo.req.FindNoteDetailReqVO;
@@ -16,6 +17,8 @@ public interface NoteService {
     Result<FindNoteDetailRspVO> findDetail(FindNoteDetailReqVO reqVO);
 
     Result update(UpdateNoteReqVO reqVO);
+
+    Result delete(DeleteNoteReqVO reqVO);
 
     void deleteNoteLocalCache(Long id);
 

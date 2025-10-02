@@ -2,6 +2,7 @@ package com.aoao.xiaoaoshu.note.biz.controller;
 
 import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
+import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.service.NoteService;
@@ -43,5 +44,13 @@ public class NoteController {
     public Result updateNote(@Validated @RequestBody UpdateNoteReqVO reqVO) {
         return noteService.update(reqVO);
     }
+
+    @Log("笔记删除")
+    @PostMapping("/delete")
+    public Result delete(@Validated @RequestBody DeleteNoteReqVO reqVO) {
+        return noteService.delete(reqVO);
+    }
+
+
 
 }

@@ -17,6 +17,7 @@ import com.aoao.xiaoaoshu.note.biz.domain.mapper.TopicDOMapper;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteStatusEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteTypeEnum;
 import com.aoao.xiaoaoshu.note.biz.enums.NoteVisibleEnum;
+import com.aoao.xiaoaoshu.note.biz.model.req.DeleteNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.PublishNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.model.req.UpdateNoteReqVO;
 import com.aoao.xiaoaoshu.note.biz.rpc.IdGeneratorRpcService;
@@ -108,7 +109,7 @@ public class NoteServiceImpl implements NoteService {
                 break;
             case VIDEO:
                 videoUri = reqVO.getVideoUri();
-                Preconditions.checkArgument(StringUtils.isNotEmpty(videoUri),"笔记视频不能为空");
+                Preconditions.checkArgument(StringUtils.isNotEmpty(videoUri), "笔记视频不能为空");
                 break;
             default:
                 break;
@@ -198,7 +199,7 @@ public class NoteServiceImpl implements NoteService {
             taskExecutor.execute(() -> {
                 // 1分钟+随机秒数
                 long expiredTime = 60 + RandomUtil.randomInt(60);
-                stringRedisTemplate.opsForValue().set(key, "null" , expiredTime, TimeUnit.SECONDS);
+                stringRedisTemplate.opsForValue().set(key, "null", expiredTime, TimeUnit.SECONDS);
             });
             throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
         }
@@ -265,7 +266,7 @@ public class NoteServiceImpl implements NoteService {
         taskExecutor.submit(() -> {
             String noteDetailJson1 = JsonUtil.toJson(findNoteDetailRspVO);
             // 过期时间（保底1天 + 随机秒数，将缓存过期时间打散，防止同一时间大量缓存失效，导致数据库压力太大）
-            long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
+            long expireSeconds = 60 * 60 * 24 + RandomUtil.randomInt(60 * 60 * 24);
             stringRedisTemplate.opsForValue().set(key, noteDetailJson1, expireSeconds, TimeUnit.SECONDS);
         });
         return Result.success(findNoteDetailRspVO);
@@ -292,14 +293,14 @@ public class NoteServiceImpl implements NoteService {
         switch (noteTypeEnum) {
             case IMAGE_TEXT: // 存放照片
                 List<String> imgUris = reqVO.getImgUris();
-                Preconditions.checkArgument(CollUtil.isNotEmpty(imgUris),"笔记图片不能为空");
-                Preconditions.checkArgument(imgUris.size()<=8,"图片不能超过8张");
+                Preconditions.checkArgument(CollUtil.isNotEmpty(imgUris), "笔记图片不能为空");
+                Preconditions.checkArgument(imgUris.size() <= 8, "图片不能超过8张");
                 // 转换成字符串
                 imgUrlsStr = StringUtils.join(imgUris, ",");
                 break;
             case VIDEO:
                 videoUri = reqVO.getVideoUri();
-                Preconditions.checkArgument(StringUtils.isNotEmpty(videoUri),"笔记视频不能为空");
+                Preconditions.checkArgument(StringUtils.isNotEmpty(videoUri), "笔记视频不能为空");
                 break;
         }
         // 3.判断topic是否存在
@@ -355,6 +356,28 @@ public class NoteServiceImpl implements NoteService {
                 RabbitConfig.DELAY_DELETE_NOTE_REDIS_CACHE_EXCHANGE,
                 RabbitConfig.DELAY_DELETE_NOTE_REDIS_ROUTING_KEY,
                 noteDetailRedisKey);
+        return Result.success();
+    }
+
+    @Override
+    public Result delete(DeleteNoteReqVO reqVO) {
+        Long id = reqVO.getId();
+        // 1.查询数据库
+        NoteDO noteDO = noteDOMapper.selectByPrimaryKey(id);
+        if (Objects.isNull(noteDO)) {
+            throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
+        }
+        // 2.逻辑删除
+        noteDO.setStatus(NoteStatusEnum.DELETED.getCode());
+        noteDO.setUpdateTime(LocalDateTime.now());
+        noteDOMapper.deleteLogically(noteDO);
+        // 3.删除redis缓存
+        String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(id);
+        stringRedisTemplate.delete(noteDetailRedisKey);
+        // 4.删除本地缓存
+        rabbitTemplate.convertAndSend(RabbitConfig.DELETE_NOTE_LOCAL_CACHE_EXCHANGE,"",id);
+        LOCAL_CACHE.invalidate(id);
+
         return Result.success();
     }
 
