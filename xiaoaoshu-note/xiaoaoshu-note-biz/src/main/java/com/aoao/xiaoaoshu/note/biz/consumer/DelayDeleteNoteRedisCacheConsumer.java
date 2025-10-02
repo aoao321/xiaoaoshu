@@ -19,7 +19,7 @@ public class DelayDeleteNoteRedisCacheConsumer {
 
     @RabbitListener(queues = RabbitConfig.DEAD_LETTER_QUEUE)
     public void onMessage(String key) {
-
+        System.out.println("第二次删除redis");
         noteService.delayDeleteNoteRedisCache(key);
     }
 }

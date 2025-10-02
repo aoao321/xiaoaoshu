@@ -18,7 +18,7 @@ spring:
         # 消费者自动启动
         auto-startup: true
         # 消费确认模式
-        acknowledge-mode: manual
+        acknowledge-mode: auto
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类
     # 数据库连接信息
