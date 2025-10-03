@@ -96,5 +96,19 @@ public class RedisKeyConstants {
     public static String buildNoteDetailKey(Long noteId) {
         return NOTE_DETAIL_KEY + noteId;
     }
+
+    /**
+     * 关注列表 KEY 前缀
+     */
+    private static final String USER_FOLLOWING_KEY_PREFIX = "following:";
+
+    /**
+     * 构建关注列表完整的 KEY
+     * @param userId
+     * @return
+     */
+    public static String buildUserFollowingKey(Long userId) {
+        return USER_FOLLOWING_KEY_PREFIX + userId;
+    }
 }
 

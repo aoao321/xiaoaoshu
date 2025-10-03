@@ -5,7 +5,7 @@ spring:
     gateway:
       routes:
         - id: relation
-          uri: lb://xiaoaoshu-user-relation
+          uri: lb://xiaoaoshu-relation
           predicates:
             - Path=/relation/**
           filters:

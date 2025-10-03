@@ -7,5 +7,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @create 2025-10-03-17:17
  */
 @Mapper
-public class FansDOMapper {
+public interface FansDOMapper {
 }
