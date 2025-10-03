@@ -1,0 +1,68 @@
+spring:
+  rabbitmq:
+    host: localhost      # RabbitMQ 服务器地址
+    port: 5672           # 默认端口
+    username: admin      # 你启动容器时设置的账号
+    password: admin      # 你启动容器时设置的密码
+    virtual-host: /      # 默认虚拟主机
+    listener:
+      simple:
+        # 每个消费者最多同时拉取的消息数量（限流）
+        prefetch: 10
+        # 消费者最大并发数
+        concurrency: 5
+        max-concurrency: 10
+        # 消费者自动启动
+        auto-startup: true
+        # 消费确认模式
+        acknowledge-mode: auto
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类
+    # 数据库连接信息
+    url: jdbc:mysql://127.0.0.1:3306/xiaoaoshu?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root # 数据库用户名
+    password: EfYXFL/uOq+ndzFMQvL/FL0FR7fEAZOp5Kb3bTkXVJwUBEHOFa7VwphqnxNT1YhG7Ua4ihmSmb3TqzrjB91mzQ== # 数据库密码
+    druid: # Druid 连接池
+      initial-size: 5 # 初始化连接池大小
+      min-idle: 5 # 最小连接池数量
+      max-active: 20 # 最大连接池数量
+      max-wait: 60000 # 连接时最大等待时间（单位：毫秒）
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000 # 配置多久进行一次检测，检测需要关闭的连接（单位：毫秒）
+      min-evictable-idle-time-millis: 300000 # 配置一个连接在连接池中最小生存的时间（单位：毫秒）
+      max-evictable-idle-time-millis: 900000 # 配置一个连接在连接池中最大生存的时间（单位：毫秒）
+      validation-query: SELECT 1 FROM DUAL # 配置测试连接是否可用的查询 sql
+      connectionProperties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJ4QdRJOn4r130JGV+hqnuzLl/xLAqIQzFmIOKQfkqxp244d/cJq5mN9DmuGa9L7RP3dQuNXgMc6I+gdKGMF400CAwEAAQ==
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: false
+      web-stat-filter:
+        enabled: true
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/* # 配置监控后台访问路径
+        login-username: admin # 配置监控后台登录的用户名、密码
+        login-password: admin
+      filter:
+        config:
+          enabled: true
+        stat:
+          enabled: true
+          log-slow-sql: true # 开启慢 sql 记录
+          slow-sql-millis: 2000 # 若执行耗时大于 2s，则视为慢 sql
+          merge-sql: true
+        wall: # 防火墙
+          config:
+            multi-statement-allow: true
+
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 1
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s

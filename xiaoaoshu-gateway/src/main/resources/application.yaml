@@ -4,6 +4,12 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: relation
+          uri: lb://xiaoaoshu-user-relation
+          predicates:
+            - Path=/relation/**
+          filters:
+            - StripPrefix=1
         - id: note
           uri: lb://xiaoaoshu-note
           predicates:
@@ -22,6 +28,7 @@ spring:
             - Path=/user/**
           filters:
             - StripPrefix=1
+
 
 
 jwt:

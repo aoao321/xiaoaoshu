@@ -20,7 +20,7 @@ import java.util.List;
 @Configuration
 public class ContextAutoConfiguration {
 
-    @Value("${security.whitelist}")
+    @Value("${security.whitelist:}")
     private List<String> whiteList;
 
     @Bean

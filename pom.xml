@@ -26,6 +26,7 @@
       <module>xiaoaoshu-distributed-id-generator</module>
       <module>xiaoaoshu-note</module>
     <module>xiaoaoshu-note/xiaoaoshu-note-api</module>
+      <module>xiaoaoshu-relation</module>
   </modules>
 
   <properties>

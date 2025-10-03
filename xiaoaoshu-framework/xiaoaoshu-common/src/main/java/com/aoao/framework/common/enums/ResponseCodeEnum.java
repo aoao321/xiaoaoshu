@@ -46,7 +46,11 @@ public enum ResponseCodeEnum {
     NOTE_UPDATE_VISIBLE_TYPE_ERROR("NOTE-20005", "未知笔记可见范围"),
     NOTE_CANT_OPERATE("NOTE-20006", "您无法操作该笔记"),
 
-    TOPIC_NOT_FOUND("TOPIC-20000","未知的话题类型")
+    TOPIC_NOT_FOUND("TOPIC-20000","未知的话题类型"),
+
+    CANT_FOLLOW_YOUR_SELF("RELATION-20001", "无法关注自己"),
+    FOLLOW_USER_NOT_EXISTED("RELATION-20002", "关注的用户不存在"),
+
     ;
 
 
