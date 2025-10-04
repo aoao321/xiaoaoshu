@@ -1,6 +1,8 @@
 package com.aoao.xiaoaoshu.relation.biz.domain.mapper;
 
+import com.aoao.xiaoaoshu.relation.biz.domain.entity.FansDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author aoao
@@ -8,4 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface FansDOMapper {
+    void insert(@Param("fansDO") FansDO fansDO);
 }

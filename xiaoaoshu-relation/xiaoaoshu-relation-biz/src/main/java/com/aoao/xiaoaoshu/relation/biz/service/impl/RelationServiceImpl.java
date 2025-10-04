@@ -8,11 +8,12 @@ import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
 import com.aoao.framework.common.util.DateUtils;
-import com.aoao.framework.common.util.JsonUtil;
+import com.aoao.xiaoaoshu.relation.biz.config.RabbitConfig;
 import com.aoao.xiaoaoshu.relation.biz.domain.entity.FollowingDO;
 import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FansDOMapper;
-import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FollowDOMapper;
+import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FollowingDOMapper;
 import com.aoao.xiaoaoshu.relation.biz.enums.LuaResultEnum;
+import com.aoao.xiaoaoshu.relation.biz.model.dto.FollowUnfollowUserMqDTO;
 import com.aoao.xiaoaoshu.relation.biz.model.vo.req.FollowUserReqVO;
 import com.aoao.xiaoaoshu.relation.biz.rpc.UserRpcService;
 import com.aoao.xiaoaoshu.relation.biz.service.RelationService;
@@ -29,9 +30,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.aoao.xiaoaoshu.relation.biz.enums.LuaResultEnum.ZSET_NOT_EXIST;
 
 /**
  * @author aoao
@@ -41,7 +39,7 @@ import static com.aoao.xiaoaoshu.relation.biz.enums.LuaResultEnum.ZSET_NOT_EXIST
 public class RelationServiceImpl implements RelationService {
 
     @Autowired
-    private FollowDOMapper followDOMapper;
+    private FollowingDOMapper followingDOMapper;
     @Autowired
     private FansDOMapper fansDOMapper;
     @Autowired
@@ -90,7 +88,7 @@ public class RelationServiceImpl implements RelationService {
             case ALREADY_FOLLOWED:
                 throw new BizException(ResponseCodeEnum.ALREADY_FOLLOWED);
             case ZSET_NOT_EXIST: //不存在zset查询数据库所有正在关注
-                List<FollowingDO> followingDOS = followDOMapper.selectByUserId(currentId);
+                List<FollowingDO> followingDOS = followingDOMapper.selectByUserId(currentId);
                 // 随机过期时间
                 // 保底1天+随机秒数
                 long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
@@ -126,7 +124,17 @@ public class RelationServiceImpl implements RelationService {
                 }
                 break;
         }
-        // 4.写入数据库
+        // 4.发送mq,写入数据库
+        // 构建消息体 DTO
+        FollowUnfollowUserMqDTO followUnfollowUserMqDTO = FollowUnfollowUserMqDTO.builder()
+                .userId(currentId)
+                .key(RabbitConfig.FOLLOW_ROUTING_KEY)
+                .followUserId(followUserId)
+                .createTime(now)
+                .build();
+        rabbitTemplate.convertAndSend(RabbitConfig.FOLLOW_UNFOLLOW_EXCHANGE,
+                RabbitConfig.FOLLOW_ROUTING_KEY,
+                followUnfollowUserMqDTO);
         return Result.success();
     }
 

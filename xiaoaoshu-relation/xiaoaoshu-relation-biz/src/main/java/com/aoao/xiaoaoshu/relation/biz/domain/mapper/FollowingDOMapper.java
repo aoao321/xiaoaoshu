@@ -2,6 +2,7 @@ package com.aoao.xiaoaoshu.relation.biz.domain.mapper;
 
 import com.aoao.xiaoaoshu.relation.biz.domain.entity.FollowingDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -10,6 +11,8 @@ import java.util.List;
  * @create 2025-10-03-17:17
  */
 @Mapper
-public interface FollowDOMapper {
+public interface FollowingDOMapper {
     List<FollowingDO> selectByUserId(Long userId);
+
+    int insert(@Param("followingDO") FollowingDO followingDO);
 }

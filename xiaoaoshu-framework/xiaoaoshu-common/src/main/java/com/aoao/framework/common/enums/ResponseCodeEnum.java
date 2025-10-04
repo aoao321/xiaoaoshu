@@ -52,6 +52,7 @@ public enum ResponseCodeEnum {
     FOLLOW_USER_NOT_EXISTED("RELATION-20002", "关注的用户不存在"),
     FOLLOWING_COUNT_LIMIT("RELATION-20003", "您关注的用户已达上限，请先取关部分用户"),
     ALREADY_FOLLOWED("RELATION-20004", "您已经关注了该用户"),
+    FOLLOW_UNFOLLOW_KEY_ERROR("RELATION-20005", "未知关注取关操作"),
     ;
 
 
