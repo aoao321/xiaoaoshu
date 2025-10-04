@@ -1,22 +1,30 @@
 package com.aoao.xiaoaoshu.relation.biz.consumer;
 
+import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
 import com.aoao.framework.common.exception.BizException;
+import com.aoao.framework.common.util.DateUtils;
 import com.aoao.xiaoaoshu.relation.biz.config.RabbitConfig;
 import com.aoao.xiaoaoshu.relation.biz.domain.entity.FansDO;
 import com.aoao.xiaoaoshu.relation.biz.domain.entity.FollowingDO;
 import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FansDOMapper;
 import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FollowingDOMapper;
+import com.aoao.xiaoaoshu.relation.biz.enums.LuaResultEnum;
 import com.aoao.xiaoaoshu.relation.biz.model.dto.FollowUnfollowUserMqDTO;
 import com.aoao.xiaoaoshu.relation.biz.service.RelationService;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -37,6 +45,8 @@ public class FollowUnfollowConsumer {
     private TransactionTemplate transactionTemplate;
     @Autowired
     private RateLimiter rateLimiter;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @RabbitListener(queues = RabbitConfig.FOLLOW_UNFOLLOW_QUEUE)
     public void onMessage(FollowUnfollowUserMqDTO dto){
@@ -62,7 +72,6 @@ public class FollowUnfollowConsumer {
         if (Objects.isNull(dto)) return;
 
         // 幂等性：通过联合唯一索引保证
-
         Long userId = dto.getUserId();
         Long followUserId = dto.getFollowUserId();
         LocalDateTime createTime = dto.getCreateTime();
@@ -94,8 +103,25 @@ public class FollowUnfollowConsumer {
             return false;
         }));
 
-        log.info("## 数据库添加记录结果：{}", isSuccess);
-        // TODO: 更新 Redis 中被关注用户的 ZSet 粉丝列表
+        // 更新 Redis 中被关注用户的 ZSet 粉丝列表
+        if (isSuccess){
+            // 若数据库操作成功，更新 Redis 中被关注用户的 ZSet 粉丝列表
+            DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+            script.setScriptSource(new ResourceScriptSource(new ClassPathResource("/lua/follow_check_and_update_fans_zset.lua")));
+            script.setResultType(Long.class);
+            // key
+            String key = RedisKeyConstants.buildUserFansKey(followUserId);
+            // 获取现在时间
+            LocalDateTime now = LocalDateTime.now();
+            long timestamp = DateUtils.localDateTime2Timestamp(now);
+            // 执行脚本
+            stringRedisTemplate.execute(script,
+                    Collections.singletonList(key),
+                    String.valueOf(userId),
+                    String.valueOf(timestamp));
+
+        }
+
     }
 
 }

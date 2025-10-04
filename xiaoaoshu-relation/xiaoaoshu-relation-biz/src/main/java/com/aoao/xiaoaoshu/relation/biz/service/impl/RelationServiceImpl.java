@@ -87,7 +87,7 @@ public class RelationServiceImpl implements RelationService {
                 throw new BizException(ResponseCodeEnum.FOLLOWING_COUNT_LIMIT);
             case ALREADY_FOLLOWED:
                 throw new BizException(ResponseCodeEnum.ALREADY_FOLLOWED);
-            case ZSET_NOT_EXIST: //不存在zset查询数据库所有正在关注
+            case ZSET_NOT_EXIST: // 不存在zset查询数据库所有正在关注
                 List<FollowingDO> followingDOS = followingDOMapper.selectByUserId(currentId);
                 // 随机过期时间
                 // 保底1天+随机秒数
@@ -124,7 +124,7 @@ public class RelationServiceImpl implements RelationService {
                 }
                 break;
         }
-        // 4.发送mq,写入数据库
+        // 4.发送mq,写入数据库，写入redis
         // 构建消息体 DTO
         FollowUnfollowUserMqDTO followUnfollowUserMqDTO = FollowUnfollowUserMqDTO.builder()
                 .userId(currentId)
