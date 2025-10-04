@@ -269,12 +269,18 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public Result update(UpdateNoteReqVO reqVO) {
+
         // 1.查询该笔记
         Long id = reqVO.getId();
         NoteDO noteDO = noteDOMapper.selectByPrimaryKey(id);
         if (Objects.isNull(noteDO)) {
             throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
         }
+        Long creatorId = noteDO.getCreatorId();
+
+        // 验证是否是作者本人
+        checkUserPermission(creatorId);
+
         // 笔记类型
         Integer type = reqVO.getType();
         // 2.获取对应类型的枚举
@@ -362,6 +368,9 @@ public class NoteServiceImpl implements NoteService {
         if (Objects.isNull(noteDO)) {
             throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
         }
+        Long creatorId = noteDO.getCreatorId();
+        // 验证是否是作者本人
+        checkUserPermission(creatorId);
         // 2.逻辑删除
         noteDO.setStatus(NoteStatusEnum.DELETED.getCode());
         noteDO.setUpdateTime(LocalDateTime.now());
@@ -384,6 +393,9 @@ public class NoteServiceImpl implements NoteService {
         if (Objects.isNull(noteDO)) {
             throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
         }
+        Long creatorId = noteDO.getCreatorId();
+        // 验证是否是作者本人
+        checkUserPermission(creatorId);
         // 2.修改可见，更新数据库
         Integer visible = reqVO.getVisible();
         if (!NoteVisibleEnum.isValid(visible)) {
@@ -403,34 +415,24 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public void deleteNoteLocalCache(Long id) {
-        LOCAL_CACHE.invalidate(id);
-    }
-
-    @Override
-    public void delayDeleteNoteRedisCache(String key) {
-        stringRedisTemplate.delete(key);
-    }
-
-    @Override
     public Result top(TopNoteReqVO topNoteReqVO) {
-        // 笔记 ID
+        // 1.查询该笔记
         Long noteId = topNoteReqVO.getId();
+        NoteDO noteDO = noteDOMapper.selectByPrimaryKey(noteId);
+        if (Objects.isNull(noteDO)) {
+            throw new BizException(ResponseCodeEnum.NOTE_NOT_FOUND);
+        }
         // 是否置顶
         Boolean isTop = topNoteReqVO.getIsTop();
 
-        // 当前登录用户 ID
-        Long currUserId = LoginUserContextHolder.getCurrentId();
+        Long creatorId = noteDO.getCreatorId();
+        // 验证是否是作者本人
+        checkUserPermission(creatorId);
 
         // 构建置顶/取消置顶 DO 实体类
-        NoteDO noteDO = NoteDO.builder()
-                .id(noteId)
-                .isTop(isTop)
-                .updateTime(LocalDateTime.now())
-                .creatorId(currUserId) // 只有笔记所有者，才能置顶/取消置顶笔记
-                .build();
+        noteDO.setIsTop(isTop);
+        noteDO.setUpdateTime(LocalDateTime.now());
         noteDOMapper.updateIsTop(noteDO);
-
         // 删除 Redis 缓存
         String noteDetailRedisKey = RedisKeyConstants.buildNoteDetailKey(noteId);
         stringRedisTemplate.delete(noteDetailRedisKey);
@@ -439,5 +441,29 @@ public class NoteServiceImpl implements NoteService {
         rabbitTemplate.convertAndSend(RabbitConfig.DELETE_NOTE_LOCAL_CACHE_EXCHANGE, "",noteId);
 
         return Result.success();
+    }
+
+    private void checkUserPermission(Long creatorId) {
+        // 验证是否是作者本人
+        // 根据笔记creatorId查询
+        FindNoteCreatorByIdRspDTO noteCreatorById = userRpcService.findNoteCreatorById(creatorId);
+        if (Objects.isNull(noteCreatorById)) {
+            throw new BizException(ResponseCodeEnum.NOTE_CANT_OPERATE);
+        }
+        // 当前user
+        Long currentId = LoginUserContextHolder.getCurrentId();
+        if (!Objects.equals(creatorId, currentId)) {
+            throw new BizException(ResponseCodeEnum.NOTE_CANT_OPERATE);
+        }
+    }
+
+    @Override
+    public void deleteNoteLocalCache(Long id) {
+        LOCAL_CACHE.invalidate(id);
+    }
+
+    @Override
+    public void delayDeleteNoteRedisCache(String key) {
+        stringRedisTemplate.delete(key);
     }
 }
