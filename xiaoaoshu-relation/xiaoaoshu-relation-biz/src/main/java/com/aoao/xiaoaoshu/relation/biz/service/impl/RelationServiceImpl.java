@@ -15,6 +15,7 @@ import com.aoao.xiaoaoshu.relation.biz.domain.mapper.FollowingDOMapper;
 import com.aoao.xiaoaoshu.relation.biz.enums.LuaResultEnum;
 import com.aoao.xiaoaoshu.relation.biz.model.dto.FollowUnfollowUserMqDTO;
 import com.aoao.xiaoaoshu.relation.biz.model.vo.req.FollowUserReqVO;
+import com.aoao.xiaoaoshu.relation.biz.model.vo.req.UnfollowUserReqVO;
 import com.aoao.xiaoaoshu.relation.biz.rpc.UserRpcService;
 import com.aoao.xiaoaoshu.relation.biz.service.RelationService;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
@@ -135,6 +136,78 @@ public class RelationServiceImpl implements RelationService {
         rabbitTemplate.convertAndSend(RabbitConfig.FOLLOW_UNFOLLOW_EXCHANGE,
                 RabbitConfig.FOLLOW_ROUTING_KEY,
                 followUnfollowUserMqDTO);
+        return Result.success();
+    }
+
+    @Override
+    public Result unfollow(UnfollowUserReqVO reqVO) {
+        // 1.判断关注和被关注的用户是否相同
+        Long unfollowUserId = reqVO.getUnfollowUserId();
+        Long currentId = LoginUserContextHolder.getCurrentId();
+        if (Objects.equals(unfollowUserId, currentId)) {
+            throw new BizException(ResponseCodeEnum.CANT_FOLLOW_YOUR_SELF);
+        }
+        // 2.调用userRpc判断被关注用户是否存在
+        FindNoteCreatorByIdRspDTO findUserById = userRpcService.findNoteCreatorById(unfollowUserId);
+        if (Objects.isNull(findUserById)) {
+            throw new BizException(ResponseCodeEnum.FOLLOW_USER_NOT_EXISTED);
+        }
+        // 3.删除关注
+        // 3.1判断是否关注，关注了才可以取关
+        // redis
+        String userFollowingKey = RedisKeyConstants.buildUserFollowingKey(currentId);
+        // 定义脚本，验证是否存在zset，zset是否存在关注的用户
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(new ClassPathResource("/lua/unfollow_check_and_delete.lua")));
+        script.setResultType(Long.class);
+        // 执行
+        Long execute = stringRedisTemplate.execute(
+                script,
+                Collections.singletonList(userFollowingKey),
+                String.valueOf(unfollowUserId));
+        LuaResultEnum resultEnum = LuaResultEnum.valueOf(execute);
+        switch (resultEnum) {
+            case ZSET_NOT_EXIST:
+                // 查询关注列表
+                List<FollowingDO> followingDOS = followingDOMapper.selectByUserId(currentId);
+                // 判空
+                if (CollUtil.isEmpty(followingDOS)) {
+                    throw new BizException(ResponseCodeEnum.FOLLOW_USER_NOT_EXISTED);
+                }
+                // 随机过期时间
+                // 保底1天+随机秒数
+                long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
+                // 构建 Lua 参数
+                Object[] luaArgs = buildLuaArgs(followingDOS, expireSeconds);
+
+                // 执行 Lua 脚本，批量同步关注关系数据到 Redis 中
+                DefaultRedisScript<Long> script3 = new DefaultRedisScript<>();
+                script3.setScriptSource(new ResourceScriptSource(new ClassPathResource("/lua/follow_batch_add_and_expire.lua")));
+                script3.setResultType(Long.class);
+                stringRedisTemplate.execute(script3, Collections.singletonList(userFollowingKey), luaArgs);
+
+                // 再次调用上面的 Lua 脚本：unfollow_check_and_delete.lua , 将取关的用户删除
+                Long result = stringRedisTemplate.execute(script, Collections.singletonList(userFollowingKey), unfollowUserId);
+                // 再次校验结果
+                if (Objects.equals(result, LuaResultEnum.NOT_FOLLOWED.getCode())) {
+                    throw new BizException(ResponseCodeEnum.NOT_FOLLOWED);
+                }
+                break;
+            case NOT_FOLLOWED:
+                throw new BizException(ResponseCodeEnum.NOT_FOLLOWED);
+        }
+
+        // 3.2发送mq,删除数据库，删除粉丝列表
+        FollowUnfollowUserMqDTO followUnfollowUserMqDTO = FollowUnfollowUserMqDTO.builder()
+                .followUserId(unfollowUserId)
+                .userId(currentId)
+                .key(RabbitConfig.UNFOLLOW_ROUTING_KEY)
+                .build();
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.FOLLOW_UNFOLLOW_EXCHANGE,
+                RabbitConfig.UNFOLLOW_ROUTING_KEY
+                ,followUnfollowUserMqDTO
+                );
         return Result.success();
     }
 

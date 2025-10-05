@@ -49,22 +49,62 @@ public class FollowUnfollowConsumer {
     private StringRedisTemplate stringRedisTemplate;
 
     @RabbitListener(queues = RabbitConfig.FOLLOW_UNFOLLOW_QUEUE)
-    public void onMessage(FollowUnfollowUserMqDTO dto){
+    public void onMessage(FollowUnfollowUserMqDTO dto) {
         // 流量削峰：通过获取令牌，如果没有令牌可用，将阻塞，直到获得
         rateLimiter.acquire();
         // 1.判断是取关还是关注
         String key = dto.getKey();
-        if (Objects.equals(key,RabbitConfig.FOLLOW_ROUTING_KEY)){// 关注
+        if (Objects.equals(key, RabbitConfig.FOLLOW_ROUTING_KEY)) {// 关注
             handleFollowTagMessage(dto);
-        }else if(Objects.equals(key,RabbitConfig.UNFOLLOW_ROUTING_KEY)){// 取关
-
-        }else {
+        } else if (Objects.equals(key, RabbitConfig.UNFOLLOW_ROUTING_KEY)) {// 取关
+            handleUnfollowTagMessage(dto);
+        } else {
             throw new BizException(ResponseCodeEnum.FOLLOW_UNFOLLOW_KEY_ERROR);
         }
     }
 
     /**
+     * 取关
+     *
+     * @param dto
+     */
+    private void handleUnfollowTagMessage(FollowUnfollowUserMqDTO dto) {
+        // 判空
+        if (Objects.isNull(dto)) return;
+        // 删除数据库
+        Long userId = dto.getUserId();
+        Long unfollowUserId = dto.getFollowUserId();
+        LocalDateTime createTime = dto.getCreateTime();
+
+        boolean isSuccess = Boolean.TRUE.equals(transactionTemplate.execute(status -> {
+            try {
+                // 取关成功需要删除数据库两条记录
+                // 关注表：一条记录
+                int count = followingDOMapper.deleteByUserIdAndFollowingUserId(userId, unfollowUserId);
+
+                // 粉丝表：一条记录
+                if (count > 0) {
+                    fansDOMapper.deleteByUserIdAndFansUserId(unfollowUserId, userId);
+                }
+                return true;
+            } catch (Exception ex) {
+                status.setRollbackOnly(); // 标记事务为回滚
+                log.error("", ex);
+            }
+            return false;
+        }));
+        if (isSuccess){// 移除粉丝列表中
+            // 被取关用户的粉丝列表 Redis Key
+            String fansRedisKey = RedisKeyConstants.buildUserFansKey(unfollowUserId);
+            // 删除指定粉丝
+            stringRedisTemplate.opsForZSet().remove(fansRedisKey, String.valueOf(userId));
+        }
+    }
+
+
+    /**
      * 关注
+     *
      * @param dto
      */
     private void handleFollowTagMessage(FollowUnfollowUserMqDTO dto) {
@@ -104,7 +144,7 @@ public class FollowUnfollowConsumer {
         }));
 
         // 更新 Redis 中被关注用户的 ZSet 粉丝列表
-        if (isSuccess){
+        if (isSuccess) {
             // 若数据库操作成功，更新 Redis 中被关注用户的 ZSet 粉丝列表
             DefaultRedisScript<Long> script = new DefaultRedisScript<>();
             script.setScriptSource(new ResourceScriptSource(new ClassPathResource("/lua/follow_check_and_update_fans_zset.lua")));

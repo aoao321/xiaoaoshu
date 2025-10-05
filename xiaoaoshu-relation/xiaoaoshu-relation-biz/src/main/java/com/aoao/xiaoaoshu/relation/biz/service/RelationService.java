@@ -2,6 +2,7 @@ package com.aoao.xiaoaoshu.relation.biz.service;
 
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.relation.biz.model.vo.req.FollowUserReqVO;
+import com.aoao.xiaoaoshu.relation.biz.model.vo.req.UnfollowUserReqVO;
 
 /**
  * @author aoao
@@ -9,4 +10,6 @@ import com.aoao.xiaoaoshu.relation.biz.model.vo.req.FollowUserReqVO;
  */
 public interface RelationService {
     Result follow(FollowUserReqVO reqVO);
+
+    Result unfollow(UnfollowUserReqVO reqVO);
 }

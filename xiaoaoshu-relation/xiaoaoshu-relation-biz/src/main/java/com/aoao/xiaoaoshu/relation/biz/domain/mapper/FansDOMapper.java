@@ -11,4 +11,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface FansDOMapper {
     void insert(@Param("fansDO") FansDO fansDO);
+
+    void deleteByUserIdAndFansUserId(@Param("unfollowUserId") Long unfollowUserId,@Param("fansId") Long userId);
 }

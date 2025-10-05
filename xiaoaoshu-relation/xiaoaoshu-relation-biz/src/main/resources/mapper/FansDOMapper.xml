@@ -8,4 +8,10 @@
         insert into t_fans (user_id, fans_user_id, create_time)
         values (#{fansDO.userId}, #{fansDO.fansUserId}, #{fansDO.createTime})
     </insert>
+    <delete id="deleteByUserIdAndFansUserId">
+        delete
+        from t_fans
+        where fans_user_id = #{fansId}
+          and user_id = #{unfollowUserId}
+    </delete>
 </mapper>

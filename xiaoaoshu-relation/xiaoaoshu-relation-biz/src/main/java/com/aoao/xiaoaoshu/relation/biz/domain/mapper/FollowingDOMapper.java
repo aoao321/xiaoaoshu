@@ -15,4 +15,6 @@ public interface FollowingDOMapper {
     List<FollowingDO> selectByUserId(Long userId);
 
     int insert(@Param("followingDO") FollowingDO followingDO);
+
+    int deleteByUserIdAndFollowingUserId(@Param("userId") Long userId,@Param("unfollowUserId") Long unfollowUserId);
 }
