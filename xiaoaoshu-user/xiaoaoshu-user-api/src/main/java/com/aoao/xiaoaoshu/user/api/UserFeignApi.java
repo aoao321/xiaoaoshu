@@ -38,5 +38,5 @@ public interface UserFeignApi {
     Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(@RequestBody FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO);
 
     @PostMapping(value = PREFIX + "/findNoteCreatorsByIds")
-    Result<List<FindNoteCreatorByIdRspDTO>> findNoteCreatorsByIds(@RequestBody FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO);
+    Result<List<FindNoteCreatorByIdRspDTO>> findNoteCreatorsByIds(@RequestBody FindNoteCreatorsByIdsReqDTO findNoteCreatorsByIdsReqDTO);
 }

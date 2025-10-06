@@ -20,4 +20,15 @@
         from t_following
         where user_id = #{userId}
     </select>
+    <select id="selectCountByUserId" resultType="long" parameterType="long">
+        select count(1) from t_following where user_id = #{userId}
+    </select>
+    <select id="selectPageListByUserId" resultType="com.aoao.xiaoaoshu.relation.biz.domain.entity.FollowingDO">
+        select following_user_id from t_following
+        where user_id = #{userId} order by create_time desc limit #{offset}, #{limit}
+    </select>
+    <select id="selectAllByUserId" resultType="com.aoao.xiaoaoshu.relation.biz.domain.entity.FollowingDO">
+        select following_user_id, create_time from t_following
+        where user_id = #{userId} limit 1000
+    </select>
 </mapper>
