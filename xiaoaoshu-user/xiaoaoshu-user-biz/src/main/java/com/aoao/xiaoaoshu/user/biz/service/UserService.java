@@ -2,13 +2,12 @@ package com.aoao.xiaoaoshu.user.biz.service;
 
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindNoteCreatorByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.*;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
+
+import java.util.List;
 
 /**
  * @author aoao
@@ -24,4 +23,6 @@ public interface UserService {
     Result<FindUserByIdRspDTO> findById(FindUserByIdReqDTO findUserByIdReqDTO);
 
     Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO);
+
+    Result<List<FindNoteCreatorByIdRspDTO>> findNoteCreatorsByIds(FindNoteCreatorsByIdsReqDTO findNoteCreatorsByIdsReqDTO);
 }

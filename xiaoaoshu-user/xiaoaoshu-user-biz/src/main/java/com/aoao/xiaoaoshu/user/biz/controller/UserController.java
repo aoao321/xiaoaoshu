@@ -4,10 +4,7 @@ import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.Result;
 import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindNoteCreatorByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.*;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
@@ -15,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author aoao
@@ -55,5 +54,11 @@ public class UserController {
     @PostMapping("/findNoteCreatorById")
     public Result<FindNoteCreatorByIdRspDTO> findNoteCreatorById(@RequestBody @Validated FindNoteCreatorByIdReqDTO findNoteCreatorByIdReqDTO) {
         return userService.findNoteCreatorById(findNoteCreatorByIdReqDTO);
+    }
+
+    @Log(value = "查询发布笔记用户们信息")
+    @PostMapping("/findNoteCreatorsByIds")
+    public Result<List<FindNoteCreatorByIdRspDTO>> findNoteCreatorsByIds(@RequestBody @Validated FindNoteCreatorsByIdsReqDTO findNoteCreatorsByIdsReqDTO) {
+        return userService.findNoteCreatorsByIds(findNoteCreatorsByIdsReqDTO);
     }
 }

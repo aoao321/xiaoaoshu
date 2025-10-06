@@ -1,10 +1,14 @@
 package com.aoao.xiaoaoshu.user.biz.domain.mapper;
 
 import com.aoao.xiaoaoshu.user.biz.domain.entity.UserDO;
+import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author aoao
@@ -23,4 +27,5 @@ public interface UserDOMapper {
 
     void insert(@Param("user") UserDO userDO);
 
+    List<FindNoteCreatorByIdRspDTO> selectByIds(@Param("set") Set<Long> absentRedisSet);
 }

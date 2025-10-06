@@ -1,10 +1,12 @@
 package com.aoao.xiaoaoshu.user.biz.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.nacos.shaded.com.google.common.base.Preconditions;
 import com.aoao.framework.biz.context.holder.LoginUserContextHolder;
 import com.aoao.framework.common.constant.RedisKeyConstants;
 import com.aoao.framework.common.enums.ResponseCodeEnum;
+import com.aoao.xiaoaoshu.user.biz.config.RabbitConfig;
 import com.aoao.xiaoaoshu.user.biz.enums.SexEnum;
 import com.aoao.framework.common.exception.BizException;
 import com.aoao.framework.common.result.Result;
@@ -19,16 +21,14 @@ import com.aoao.xiaoaoshu.user.biz.model.vo.UpdateUserInfoReqVO;
 import com.aoao.xiaoaoshu.user.biz.rpc.IdGeneratorRpcService;
 import com.aoao.xiaoaoshu.user.biz.rpc.OssRpcService;
 import com.aoao.xiaoaoshu.user.biz.service.UserService;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindNoteCreatorByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByIdReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.FindUserByPhoneReqDTO;
-import com.aoao.xiaoaoshu.user.model.dto.req.RegisterUserReqDTO;
+import com.aoao.xiaoaoshu.user.model.dto.req.*;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByIdRspDTO;
 import com.aoao.xiaoaoshu.user.model.dto.rsp.FindUserByPhoneRspDTO;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,8 +40,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author aoao
@@ -60,6 +61,8 @@ public class UserServiceImpl implements UserService {
     private UserRoleDOMapper userRoleDOMapper;
     @Autowired
     private IdGeneratorRpcService idGeneratorRpcService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     @Autowired
     @Qualifier("taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
@@ -223,7 +226,7 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isBlank(userInfoStr)) {// 查询到，直接返回
             FindNoteCreatorByIdRspDTO rspDTO = JsonUtil.fromJson(userInfoStr, FindNoteCreatorByIdRspDTO.class);
             // 写入本地缓存
-            taskExecutor.execute(()->{
+            taskExecutor.execute(() -> {
                 LOCAL_CACHE.put(id, rspDTO);
             });
             return Result.success(rspDTO);
@@ -233,7 +236,7 @@ public class UserServiceImpl implements UserService {
         UserDO userDO = userDOMapper.getById(id);
         // 如果为空，则直接返回null，并将null写入redis
         if (Objects.isNull(userDO)) {
-            taskExecutor.execute(()->{
+            taskExecutor.execute(() -> {
                 // 防止缓存穿透，将空数据存入 Redis 缓存 (过期时间不宜设置过长)
                 // 保底1分钟 + 随机秒数
                 long expireSeconds = 60 + RandomUtil.randomInt(60);
@@ -245,13 +248,56 @@ public class UserServiceImpl implements UserService {
         FindNoteCreatorByIdRspDTO rspDTO = new FindNoteCreatorByIdRspDTO();
         BeanUtils.copyProperties(userDO, rspDTO);
         // 4.写入redis中
-        taskExecutor.submit(()->{
+        taskExecutor.submit(() -> {
             // 过期时间（保底1天 + 随机秒数，将缓存过期时间打散，防止同一时间大量缓存失效，导致数据库压力太大）
-            long expireSeconds = 60*60*24 + RandomUtil.randomInt(60*60*24);
-            stringRedisTemplate.opsForValue().set(key,JsonUtil.toJson(rspDTO),expireSeconds,TimeUnit.SECONDS);
+            long expireSeconds = 60 * 60 * 24 + RandomUtil.randomInt(60 * 60 * 24);
+            stringRedisTemplate.opsForValue().set(key, JsonUtil.toJson(rspDTO), expireSeconds, TimeUnit.SECONDS);
         });
 
         return Result.success(rspDTO);
+    }
+
+    @Override
+    public Result<List<FindNoteCreatorByIdRspDTO>> findNoteCreatorsByIds(FindNoteCreatorsByIdsReqDTO findNoteCreatorsByIdsReqDTO) {
+        List<Long> ids = findNoteCreatorsByIdsReqDTO.getIds();
+        // 1.查询redis中用户信息
+        // 构建key
+        List<String> keys = ids.stream()
+                .map(id -> RedisKeyConstants.buildUserInfoKey(id))
+                .collect(Collectors.toList());
+        // 批量查询
+        List<String> userInfoStrList = stringRedisTemplate.opsForValue().multiGet(keys);
+        // 如果缓存中不为空
+        if (CollUtil.isNotEmpty(userInfoStrList)) {
+            // 过滤掉为空的数据,为redis中存在的数据
+            userInfoStrList = userInfoStrList.stream().filter(StringUtils::isNotBlank).toList();
+        }
+        // 2.返参
+        List<FindNoteCreatorByIdRspDTO> findNoteCreatorByIdRspDTOS = new ArrayList<>();
+        List<FindNoteCreatorByIdRspDTO> redisList = userInfoStrList.stream()
+                .map(str -> JsonUtil.fromJson(str, FindNoteCreatorByIdRspDTO.class))
+                .toList();
+        // 加入返参集合中
+        findNoteCreatorByIdRspDTOS.addAll(redisList);
+        // 3.从数据库中查询redis中没有的数据
+        Set<Long> redisUserIdsSet = redisList.stream()
+                .map(redisUser -> redisUser.getId())
+                .collect(Collectors.toSet());
+        Set<Long> absentRedisSet = new HashSet<>(ids);
+        // 获得redis中没有的ids
+        absentRedisSet.removeAll(redisUserIdsSet);
+        if (absentRedisSet.isEmpty()) { // 说明都存在redis中直接返回
+            return Result.success(findNoteCreatorByIdRspDTOS);
+        }
+        // 4.查询数据库
+        List<FindNoteCreatorByIdRspDTO> userFromDB = userDOMapper.selectByIds(absentRedisSet);
+        // 5.mq同步到redis中
+        findNoteCreatorByIdRspDTOS.addAll(userFromDB);
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.USER_INFO_TO_REDIS_EXCHANGE,
+                RabbitConfig.USER_INFO_TO_REDIS_ROUTING_KEY,
+                userFromDB);
+        return Result.success(findNoteCreatorByIdRspDTOS);
     }
 
 

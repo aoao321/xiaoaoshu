@@ -28,4 +28,9 @@ public class FindNoteCreatorByIdRspDTO {
      * 头像
      */
     private String avatar;
+
+    /**
+     * 简介
+     */
+    private String introduction;
 }

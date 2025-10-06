@@ -7,4 +7,20 @@
         INSERT INTO t_user (id,phone, xiaohashu_id, nickname, password, status)
         VALUES (#{user.id},#{user.phone}, #{user.xiaoaoshuId}, #{user.nickname}, #{user.password}, #{user.status})
     </insert>
+    <select id="selectByIds"
+            resultType="com.aoao.xiaoaoshu.user.model.dto.rsp.FindNoteCreatorByIdRspDTO">
+        SELECT id, nickname, avatar, introduction
+        FROM t_user
+        <where>
+            <if test="ids != null and ids.size() > 0">
+                id IN
+                <foreach collection="set" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="ids == null or ids.size() == 0">
+                1 = 2
+            </if>
+        </where>
+    </select>
 </mapper>
