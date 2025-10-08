@@ -27,6 +27,7 @@
       <module>xiaoaoshu-note</module>
     <module>xiaoaoshu-note/xiaoaoshu-note-api</module>
       <module>xiaoaoshu-relation</module>
+      <module>xiaoaoshu-search</module>
   </modules>
 
   <properties>
@@ -68,10 +69,27 @@
     <feign-form.version>3.8.0</feign-form.version>
     <caffeine.version>3.1.8</caffeine.version>
     <rabbitmq.version>3.11</rabbitmq.version>
+    <elasticsearch.version>7.3.0</elasticsearch.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Elasticsearch 分布式搜索引擎 -->
+      <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        <version>${elasticsearch.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-client</artifactId>
+        <version>${elasticsearch.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.elasticsearch</groupId>
+        <artifactId>elasticsearch</artifactId>
+        <version>${elasticsearch.version}</version>
+      </dependency>
       <!-- Caffeine 本地缓存 -->
       <dependency>
         <groupId>com.github.ben-manes.caffeine</groupId>
