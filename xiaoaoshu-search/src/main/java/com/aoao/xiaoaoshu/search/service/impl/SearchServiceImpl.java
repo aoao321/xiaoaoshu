@@ -1,5 +1,6 @@
 package com.aoao.xiaoaoshu.search.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aoao.framework.common.result.PageResult;
 import com.aoao.xiaoaoshu.search.index.UserIndex;
 import com.aoao.xiaoaoshu.search.model.vo.req.SearchUserReqVO;
@@ -15,6 +16,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -61,6 +63,12 @@ public class SearchServiceImpl implements SearchService {
         // 分页
         sourceBuilder.from(offset);
         sourceBuilder.size(limit);
+        // 设置高亮字段
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field(UserIndex.FIELD_USER_NICKNAME)
+                .preTags("<strong>") // 设置包裹标签
+                .postTags("</strong>");
+        sourceBuilder.highlighter(highlightBuilder);
         // 将构建的查询条件设置到 SearchRequest 中
         searchRequest.source(sourceBuilder);
         // 返参 VO 集合
@@ -78,6 +86,12 @@ public class SearchServiceImpl implements SearchService {
             SearchHits hits = searchResponse.getHits();
             for (SearchHit hit : hits) {
                 log.info("==> 文档数据: {}", hit.getSourceAsString());
+                // 获取高亮字段
+                String highlightedNickname = null;
+                if (CollUtil.isNotEmpty(hit.getHighlightFields())
+                        && hit.getHighlightFields().containsKey(UserIndex.FIELD_USER_NICKNAME)) {
+                    highlightedNickname = hit.getHighlightFields().get(UserIndex.FIELD_USER_NICKNAME).fragments()[0].string();
+                }
                 // 获取文档的所有字段（以 Map 的形式返回）
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 // 提取特定字段值
@@ -96,6 +110,7 @@ public class SearchServiceImpl implements SearchService {
                         .xiaoaoshuId(xiaoaoshuId)
                         .noteTotal(noteTotal)
                         .fansTotal(fansTotal)
+                        .highlightNickname(highlightedNickname)
                         .build();
                 searchUserRspVOS.add(searchUserRspVO);
             }
