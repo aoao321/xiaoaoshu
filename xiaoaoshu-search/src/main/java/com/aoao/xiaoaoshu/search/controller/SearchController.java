@@ -2,7 +2,9 @@ package com.aoao.xiaoaoshu.search.controller;
 
 import com.aoao.framework.biz.operationlog.annotation.Log;
 import com.aoao.framework.common.result.PageResult;
+import com.aoao.xiaoaoshu.search.model.vo.req.SearchNoteReqVO;
 import com.aoao.xiaoaoshu.search.model.vo.req.SearchUserReqVO;
+import com.aoao.xiaoaoshu.search.model.vo.rsp.SearchNoteRspVO;
 import com.aoao.xiaoaoshu.search.model.vo.rsp.SearchUserRspVO;
 import com.aoao.xiaoaoshu.search.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,5 +29,11 @@ public class SearchController {
     @Log("搜索用户")
     public PageResult<SearchUserRspVO> searchUser(@RequestBody @Validated SearchUserReqVO searchUserReqVO) {
         return searchService.searchUser(searchUserReqVO);
+    }
+
+    @PostMapping("/note")
+    @Log("搜索笔记")
+    public PageResult<SearchNoteRspVO> searchNote(@RequestBody @Validated SearchNoteReqVO searchNoteReqVO) {
+        return searchService.searchNote(searchNoteReqVO);
     }
 }

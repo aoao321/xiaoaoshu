@@ -1,7 +1,9 @@
 package com.aoao.xiaoaoshu.search.service;
 
 import com.aoao.framework.common.result.PageResult;
+import com.aoao.xiaoaoshu.search.model.vo.req.SearchNoteReqVO;
 import com.aoao.xiaoaoshu.search.model.vo.req.SearchUserReqVO;
+import com.aoao.xiaoaoshu.search.model.vo.rsp.SearchNoteRspVO;
 import com.aoao.xiaoaoshu.search.model.vo.rsp.SearchUserRspVO;
 
 /**
@@ -11,4 +13,6 @@ import com.aoao.xiaoaoshu.search.model.vo.rsp.SearchUserRspVO;
 public interface SearchService {
 
     PageResult<SearchUserRspVO> searchUser(SearchUserReqVO searchUserReqVO);
+
+    PageResult<SearchNoteRspVO> searchNote(SearchNoteReqVO searchNoteReqVO);
 }
